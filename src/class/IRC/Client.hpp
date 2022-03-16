@@ -1,24 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
+/*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/15 20:47:58 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/03/15 21:03:21 by lsuardi          ###   ########.fr       */
+/*   Created: 2022/03/16 00:53:55 by Leo Suardi        #+#    #+#             */
+/*   Updated: 2022/03/16 00:55:25 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
+#pragma once
 
 namespace IRC {
-	Server::Server( void )
-	{
-	}
-	
-	
-	Server::~Server( void )
-	{
-	}
+	class Client {
+		public:
+			Client( void );
+			~Client( void );
+
+
+		private:
+			int	m_sockfd;
+	};
 }

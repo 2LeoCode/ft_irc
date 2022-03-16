@@ -3,25 +3,26 @@
 /*                                                        :::      ::::::::   */
 /*   Trie.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 21:05:00 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/03/15 22:20:32 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/03/16 00:56:23 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "Trienode.hpp"
+#include <string>
 #include <cstddef>
 
-template < class T, class Allocator >
+template < class T, class Allocator = std::allocator< T > >
 class Trie {
 	public:
-		typedef Allocator		allocator_type;
-		typedef T				value_type;
-		typedef std::size_t		size_type;
-		typedef Trienode< T >	node_type;
+		typedef Allocator					allocator_type;
+		typedef T							value_type;
+		typedef std::size_t					size_type;
+		typedef Trienode< T, Allocator >	node_type;
 
 		Trie( void );
 		Trie( const Trie& );
