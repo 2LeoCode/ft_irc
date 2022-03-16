@@ -3,14 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Trienode.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:03:27 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/03/16 00:53:02 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/03/16 19:13:32 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Trienode.hpp"
+
+#include <cstddef>
+#include <cstring>
 
 #define TEMPLATE template < class T, class Allocator >
 #define TYPE Trienode < T, Allocator >
@@ -19,28 +22,41 @@
 #define CONSTRUCTOR TEMPLATE TYPE::Trienode
 #define DESTRUCTOR TEMPLATE TYPE::~Trienode
 
-static char	*g_printable =
-	" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMN"
-	"OPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
-CONSTRUCTOR( void )
+CONSTRUCTOR( const Allocator &alloc )
+:	m_alloc(alloc),
+	m_data(NULL)
 {
+	std::memset(m_children, 0, sizeof(m_children) / sizeof(*m_children));
 }
 
-CONSTRUCTOR( const std::string )
+CONSTRUCTOR( const Trienode &other )
+:	m_alloc(other.m_alloc),
+	m_data(NULL)
 {
+	std::memset(m_children, 0, sizeof(m_children) / sizeof(*m_children));
+	if (other.m_data)
+	{
+		m_data = m_alloc.allocate(1);
+		m_alloc.construct(m_data, *other.m_data);
+	}
 }
 
-CONSTRUCTOR( const Trienode& )
+CONSTRUCTOR( T &value, const Allocator &alloc )
+:	m_alloc(alloc),
+	m_data(m_alloc.allocate(1))
 {
-}
-
-CONSTRUCTOR( T& )
-{
+	std::memset(m_children, 0, sizeof(m_children) / sizeof(*m_children));
+	m_alloc.construct(m_data, value);
 }
 
 DESTRUCTOR( void )
 {
+	if (m_data)
+	{
+		m_alloc.destroy(m_data);
+		m_alloc.deallocate(m_data, 1);
+	}
 }
 
 
@@ -78,6 +94,9 @@ MEMBER( TYPE*&, children )( unsigned char )
 MEMBER( const TYPE*&, children )( unsigned char ) const
 {
 }
+
+
+// Lookup
 
 MEMBER( bool, has_children )( void ) const
 {
