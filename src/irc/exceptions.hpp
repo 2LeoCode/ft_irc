@@ -5,21 +5,19 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/21 14:06:13 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/04/08 14:28:46 by lsuardi          ###   ########.fr       */
+/*   Created: 2022/04/08 14:31:16 by lsuardi           #+#    #+#             */
+/*   Updated: 2022/04/08 15:18:26 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
-
-#include <exception>
 #include "../exception_macro.hpp"
 
-namespace data
+namespace irc
 {
 
-	EXCEPTION( invalid_key, "trie: invalid key" );
-	EXCEPTION( key_in_use, "trie: key already in use" );
-	EXCEPTION( child_null, "trie: child is NULL" );
+	EXCEPTION( socket_failure, "irc: failed to open server socket" );
+	EXCEPTION( socket_already_bound, "irc: socket is already bound" );
+	EXCEPTION( uninitialized_socket, "irc: server socket is uninitialized" );
 
 }
