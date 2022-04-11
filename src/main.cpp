@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/22 23:58:32 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/03/31 20:41:12 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/04/11 19:26:02 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,14 @@
 #include <cstdlib>
 #include <climits>
 
+#include "net.hpp"
+
 int	main( int argc, char **argv )
 {
 	char		*endptr;
-	int			port;
+	short		port;
 	std::string	password;
+	net::Socket	sock;
 
 	if (argc < 3) {
 		std::cerr << "usage: " << *argv << " <port> <password>" << std::endl;

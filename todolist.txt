@@ -1,0 +1,102 @@
+==> JOIN
+
+Syntax:
+
+    JOIN <channels> [<keys>]
+
+Makes the client join the channels in the comma-separated list <channels>, specifying the passwords, if needed, in the comma-separated list <keys>.[11] If the channel(s) do not exist then they will be created. Defined in RFC 1459. 
+
+
+
+==> KICK
+
+Syntax:
+
+    KICK <channel> <client> :[<message>]
+
+Forcibly removes <client> from <channel>.[12] This command may only be issued by channel operators. Defined in RFC 1459. 
+
+
+
+==> NICK
+
+Syntax:
+
+    NICK <nickname> [<hopcount>] (RFC 1459)
+    NICK <nickname> (RFC 2812)
+
+Allows a client to change their IRC nickname. Hopcount is for use between servers to specify how far away a nickname is from its home server.[23][24] Defined in RFC 1459; the optional <hopcount> parameter was removed in RFC 2812. 
+
+
+
+==> SETNAME
+
+Syntax:
+
+    SETNAME <new real name>
+
+Allows a client to change the "real name" specified when registering a connection.
+
+This command is not formally defined by an RFC, but is in use by some IRC daemons. Support is indicated in a RPL_ISUPPORT reply (numeric 005) with the SETNAME keyword 
+
+
+
+==> PART
+
+Syntax:
+
+    PART <channels> [<message>]
+
+Causes a user to leave the channels in the comma-separated list <channels>.[27] Defined in RFC 1459. 
+
+
+
+==> PASS
+
+Syntax:
+
+    PASS <password>
+
+Sets a connection password.[28] This command must be sent before the NICK/USER registration combination. Defined in RFC 1459. 
+
+
+
+==> PRIVMSG
+
+Syntax:
+
+    PRIVMSG <msgtarget> :<message>
+
+Sends <message> to <msgtarget>, which is usually a user or channel.[31] Defined in RFC 1459. 
+
+
+
+==> QUIT
+
+Syntax:
+
+    QUIT [<message>]
+
+Disconnects the user from the server.[32] Defined in RFC 1459. 
+
+
+
+==> USER
+
+Syntax:
+
+    USER <username> <hostname> <servername> <realname> (RFC 1459)
+    USER <user> <mode> <unused> <realname> (RFC 2812)
+
+This command is used at the beginning of a connection to specify the username, hostname, real name and initial user modes of the connecting client.[43][44] <realname> may contain spaces, and thus must be prefixed with a colon. Defined in RFC 1459, modified in RFC 2812. 
+
+
+
+
+==> OPER
+
+Syntax:
+
+    OPER <username> <password>
+
+Authenticates a user as an IRC operator on that server/network.[26] Defined in RFC 1459. 
