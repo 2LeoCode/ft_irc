@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/11 18:57:26 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/04/11 20:11:20 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/04/12 13:49:50 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,8 +43,7 @@ namespace net {
 			throw std::runtime_error("socket");
 		if (setsockopt(m_sockfd, SOL_SOCKET, IPV6_V6ONLY, &tmp, 0))
 			throw std::runtime_error("setsockopt");
-		m_fds[0].fd = m_sockfd;
-		m_fds[0].events = POLLIN;
+		m_fds.push_back((pollfd){ m_sockfd, POLLIN });
 		m_nfds = 1;
 		return *this;
 	}
@@ -88,7 +87,7 @@ namespace net {
 
 	Socket	&Socket::recv( std::string &s )
 	{
-
+		
 	}
 
 	Socket	&Socket::send( std::string s )

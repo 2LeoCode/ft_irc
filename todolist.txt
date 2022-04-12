@@ -100,3 +100,11 @@ Syntax:
     OPER <username> <password>
 
 Authenticates a user as an IRC operator on that server/network.[26] Defined in RFC 1459. 
+
+
+proxy script:
+
+python proxy.py <server_addr> <server_port> <proxy_port>
+
+irssi ==>
+	/connect localhost <proxy_port>
