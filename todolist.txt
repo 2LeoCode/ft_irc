@@ -108,3 +108,5 @@ python proxy.py <server_addr> <server_port> <proxy_port>
 
 irssi ==>
 	/connect localhost <proxy_port>
+
+

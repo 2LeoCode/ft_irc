@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/22 23:58:32 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/04/12 16:38:49 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/04/23 17:40:37 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,16 @@
 
 #include "data.hpp"
 #include "net.hpp"
-int	trie_test_2( void );
 
 int	main( int argc, char **argv )
 {
-	trie_test_2();
-	char		*endptr;
-	long		port;
-	std::string	password;
-	net::Socket	sock;
-	std::string	command;
-	
+	char						*endptr;
+	long						port;
+	std::string					password;
+	net::TCPServer				serv;
+	std::string					command;
+	std::vector< TCPClient >	clients;
+
 	if (argc < 3)
 	{
 		std::cerr << "usage: " << *argv << " <port> <password>" << std::endl;
@@ -44,19 +43,26 @@ int	main( int argc, char **argv )
 	password += argv[argc - 1];
 	try
 	{
-		sock.open().bind(port).listen();
-		while (true)
-		{
-			sock.poll();
-			if (sock.is_server())
-				sock.accept();
-			else
-				sock.recv();
-			while ((command = get_next_cmd()) != "")
-			{
-				exec_command(command)
-				send_response();
+		serv.open().bind(port).listen();
+		while (true) {
+			std::string	request;
+			int id = serv.poll();
+
+			if (id == 0)
+				clients.push_back(serv.accept());
+			else {
+				int fd = serv.recv(id);
+
+				if (fd) {
+					typedef std::vector< TCPClient >::const_iterator iterator;
+
+					for (iterator it = clients.begin(); it != clients.end(); ++it) {
+						if (it->sockfd == fd)
+							clients.erase(it);
+					}
+				}
 			}
+			serv.handle_pending();
 		}
 	} 
 	catch (const std::exception &e)

@@ -1,16 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   net.hpp                                            :+:      :+:    :+:   */
+/*   TCPClient.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/04/11 14:28:38 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/04/23 17:12:02 by Leo Suardi       ###   ########.fr       */
+/*   Created: 2022/04/23 17:06:19 by Leo Suardi        #+#    #+#             */
+/*   Updated: 2022/04/23 17:07:28 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "net/TCPClient/TCPClient.hpp"
-#include "net/TCPServer/TCPServer.hpp"
+#include <netinet/in.h>
+
+struct TCPClient {
+	sockaddr_in6	addr;
+	socklen_t		len;
+	int				sockfd;
+};

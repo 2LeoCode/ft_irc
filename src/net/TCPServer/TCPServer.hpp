@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Socket.hpp                                         :+:      :+:    :+:   */
+/*   TCPServer.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/11 16:52:52 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/04/12 14:00:08 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/04/23 17:54:07 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,21 +17,24 @@
 #include <netinet/in.h>
 #include <vector>
 #include <string>
+#include "../TCPClient/TCPClient.hpp"
+
+#define RECV_BUFSIZE 1024
 
 namespace net {
 
-	class Socket {
+	class TCPServer {
 		public:
-			Socket( void );
-			~Socket( );
+			TCPServer( void );
+			~TCPServer( );
 
-			Socket	&open( int = AF_INET6, int = SOCK_STREAM, int = 0 );
-			Socket	&bind( short );
-			Socket	&listen( int = 32 );
-			Socket	&poll( int = -1 );
-			Socket	&accept( void );
-			Socket	&recv( void );
-			Socket	&handle( void );
+			TCPServer	&open( int = AF_INET6, int = SOCK_STREAM, int = 0 );
+			TCPServer	&bind( short );
+			TCPServer	&listen( int = 32 );
+			int			poll( int = -1 );
+			TCPClient	accept( void );
+			int			recv( unsigned );
+			TCPServer	&send( unsigned, std::string );
 
 		private:
 			int							m_sockfd;
@@ -39,7 +42,6 @@ namespace net {
 			sockaddr_in6				m_sockaddr;
 			std::vector< pollfd >		m_fds;
 			std::vector< std::string >	m_pending;
-			size_t						m_nfds;
 	};
 
 }
