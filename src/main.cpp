@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/22 23:58:32 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/04/23 17:40:37 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/04/23 17:57:14 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	main( int argc, char **argv )
 		serv.open().bind(port).listen();
 		while (true) {
 			std::string	request;
-			int id = serv.poll();
+			unsigned id = serv.poll();
 
 			if (id == 0)
 				clients.push_back(serv.accept());

@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/11 16:52:52 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/04/23 17:54:07 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/04/23 17:57:01 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ namespace net {
 			TCPServer	&open( int = AF_INET6, int = SOCK_STREAM, int = 0 );
 			TCPServer	&bind( short );
 			TCPServer	&listen( int = 32 );
-			int			poll( int = -1 );
+			unsigned	poll( int = -1 );
 			TCPClient	accept( void );
 			int			recv( unsigned );
 			TCPServer	&send( unsigned, std::string );
