@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/22 23:58:32 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/04/23 17:57:14 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/04/29 16:14:09 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,9 @@
 
 int	main( int argc, char **argv )
 {
-	char						*endptr;
-	long						port;
-	std::string					password;
-	net::TCPServer				serv;
-	std::string					command;
-	std::vector< TCPClient >	clients;
+	char		*endptr;
+	long		port;
+	std::string	password;
 
 	if (argc < 3)
 	{
@@ -41,33 +38,6 @@ int	main( int argc, char **argv )
 	for (int i = 2; i < argc - 1; ++i)
 		(password += argv[i]) += ' ';
 	password += argv[argc - 1];
-	try
-	{
-		serv.open().bind(port).listen();
-		while (true) {
-			std::string	request;
-			unsigned id = serv.poll();
 
-			if (id == 0)
-				clients.push_back(serv.accept());
-			else {
-				int fd = serv.recv(id);
-
-				if (fd) {
-					typedef std::vector< TCPClient >::const_iterator iterator;
-
-					for (iterator it = clients.begin(); it != clients.end(); ++it) {
-						if (it->sockfd == fd)
-							clients.erase(it);
-					}
-				}
-			}
-			serv.handle_pending();
-		}
-	} 
-	catch (const std::exception &e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
 	return 0;
 }
