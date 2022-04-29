@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/04/29 16:59:18 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/04/29 17:51:57 by martin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,5 +68,39 @@ namespace irc {
 		m_opt.fionbio = true;
 		m_opt.reuseaddr = true;
 		m_opt.v6only = true;
+	}
+
+	// martin ajout
+	void Server::parseCommand(const std::string &command)
+	{
+		std::string	delimiter = " ";
+		size_t		pos(0);
+
+		while (pos < command.length())
+		{
+			m_command.push_back(command.substr(pos, command.find(delimiter, pos) - pos));
+			pos = command.find(delimiter, pos);
+			pos += (pos != command.npos);
+		}
+	}
+
+	// martin ajout
+	int Server::execCommand()
+	{
+		size_t size = sizeof(cmdTab) / sizeof(*cmdTab);
+	
+		for (unsigned i = 0; i < size; i++)
+		{
+			if (!m_command[0].compare(cmdTab[i]))
+			{
+				m_commandId = i;
+				break;
+			}
+		}
+	
+		if (m_commandId == -1)
+			return (-1);
+	
+		return (0);
 	}
 }

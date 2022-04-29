@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/04/29 16:58:56 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/04/29 18:04:25 by martin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,23 @@ namespace irc {
 			int			send( const std::string&, const std::string& );
 			int			recv( int );
 
+			void		parseCommand(const std::string &command); // martin ajout
+			int			execCommand(); // martin ajout
+
+			// martin ajout
+			int			execJoin(const std::vector<std::string> &command);
+			int			execKick(const std::vector<std::string> &command);
+			int			execNick(const std::vector<std::string> &command);
+			int			execSetname(const std::vector<std::string> &command);
+			int			execPart(const std::vector<std::string> &command);
+			int			execPass(const std::vector<std::string> &command);
+			int			execPrivmsg(const std::vector<std::string> &command);
+			int			execQuit(const std::vector<std::string> &command);
+			int			execUser(const std::vector<std::string> &command);
+			int			execOper(const std::vector<std::string> &command);
+
+			const static std::string cmdTab[10]; //martin ajout
+
 
 		private:
 			void		m_init( int m_sockfd = -1 );
@@ -55,6 +72,8 @@ namespace irc {
 			std::map< int, Client* >		m_clients_by_fd;
 			data::Trie< Channel >			m_channels;
 			data::Trie< Client >			m_clients;
+			std::vector< std::string >		m_command; // martin ajout
+			int								m_commandId; // martin ajout
 			struct {
 				bool v6only, reuseaddr, fionbio;
 			}								m_opt;
