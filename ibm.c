@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #define SERVER_PORT  12345
 
@@ -18,7 +19,7 @@ main (int argc, char *argv[])
   int    listen_sd = -1, new_sd = -1;
   int    desc_ready, end_server = FALSE, compress_array = FALSE;
   int    close_conn;
-  char   buffer[80];
+  char   buffer[10];
   struct sockaddr_in6   addr;
   int    timeout;
   struct pollfd fds[200];
@@ -52,13 +53,8 @@ main (int argc, char *argv[])
   /* the incoming connections will also be nonblocking since   */
   /* they will inherit that state from the listening socket.   */
   /*************************************************************/
-  rc = ioctl(listen_sd, FIONBIO, (char *)&on);
-  if (rc < 0)
-  {
-    perror("ioctl() failed");
-    close(listen_sd);
-    exit(-1);
-  }
+  int flags = fcntl(listen_sd, F_GETFL);
+  fcntl(listen_sd, F_SETFL, flags | O_NONBLOCK);
 
   /*************************************************************/
   /* Bind the socket                                           */
@@ -223,8 +219,6 @@ main (int argc, char *argv[])
         /* before we loop back and call poll again.            */
         /*******************************************************/
 
-        do
-        {
           /*****************************************************/
           /* Receive data on this connection until the         */
           /* recv fails with EWOULDBLOCK. If any other         */
@@ -239,7 +233,7 @@ main (int argc, char *argv[])
               perror("  recv() failed");
               close_conn = TRUE;
             }
-            break;
+            goto next;
           }
 
           /*****************************************************/
@@ -250,7 +244,7 @@ main (int argc, char *argv[])
           {
             printf("  Connection closed\n");
             close_conn = TRUE;
-            break;
+            goto next;
           }
 
           /*****************************************************/
@@ -267,10 +261,8 @@ main (int argc, char *argv[])
           {
             perror("  send() failed");
             close_conn = TRUE;
-            break;
           }
-
-        } while(TRUE);
+		next:
 
         /*******************************************************/
         /* If the close_conn flag was turned on, we need       */

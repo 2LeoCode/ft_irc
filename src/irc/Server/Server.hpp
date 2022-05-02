@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/04/29 18:04:25 by martin           ###   ########.fr       */
+/*   Updated: 2022/05/02 20:56:49 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,64 +18,70 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <queue>
 
-#include "../data.hpp"
 #include "../../irc.hpp"
 
-using std::string;
-using std::vector;
-using std::map;
-
+#define CMD_COUNT 10
 
 namespace irc {
 
 	class Server {
 		public:
-			Server();
+			Server( void );
 			Server( short, string, int = 0, int = 32 );
 			~Server();
 
 			Server		&open( short, int = 0, int = 32 );
-			int			run( void );
-
 			void		loop( void );
-			int			send( int, const std::string& );
-			int			send( const std::string&, const std::string& );
-			int			recv( int );
 
-			void		parseCommand(const std::string &command); // martin ajout
-			int			execCommand(); // martin ajout
 
-			// martin ajout
-			int			execJoin(const std::vector<std::string> &command);
-			int			execKick(const std::vector<std::string> &command);
-			int			execNick(const std::vector<std::string> &command);
-			int			execSetname(const std::vector<std::string> &command);
-			int			execPart(const std::vector<std::string> &command);
-			int			execPass(const std::vector<std::string> &command);
-			int			execPrivmsg(const std::vector<std::string> &command);
-			int			execQuit(const std::vector<std::string> &command);
-			int			execUser(const std::vector<std::string> &command);
-			int			execOper(const std::vector<std::string> &command);
+			struct ShutdownEvent { }; // We throw this object to turn off the server
+
+		private:
 
 			const static std::string cmdTab[10]; //martin ajout
 
+			void		m_send( int, const std::string& );
+			//int		send( const std::string&, const std::string& ); Implementer si besoin
+			void		m_recv( int );
+			void		m_parsePending( void );
+			void		m_execCommandQueues( void );
 
-		private:
+			vector< string >	m_parseCommand(const std::string&); // martin ajout
+			int					m_execCommand( const vector< string >&); // martin ajout
+
+			// martin ajout
+			int			m_execJoin(const std::vector<std::string> &command);
+			int			m_execKick(const std::vector<std::string> &command);
+			int			m_execNick(const std::vector<std::string> &command);
+			int			m_execSetname(const std::vector<std::string> &command);
+			int			m_execPart(const std::vector<std::string> &command);
+			int			m_execPass(const std::vector<std::string> &command);
+			int			m_execPrivmsg(const std::vector<std::string> &command);
+			int			m_execQuit(const std::vector<std::string> &command);
+			int			m_execUser(const std::vector<std::string> &command);
+			int			m_execOper(const std::vector<std::string> &command);
+
 			void		m_init( int m_sockfd = -1 );
 
-			int								m_sockfd;
-			sockaddr_in6					m_addr;
-			std::string						m_password;
-			std::vector< pollfd >			m_pollfd;
-			std::map< int, std::string >	m_pending;
-			std::map< int, Client* >		m_clients_by_fd;
-			data::Trie< Channel >			m_channels;
-			data::Trie< Client >			m_clients;
-			std::vector< std::string >		m_command; // martin ajout
-			int								m_commandId; // martin ajout
+			int										m_sockfd;
+			sockaddr_in6							m_addr;
+			string									m_password;
+			vector< pollfd >						m_pollfd;
+			map< int, Client >						m_clients;
+			vector< Channel >						m_channels;
+
+			map< int, string >						m_pending;
+			map< int, queue< vector < string > > >	m_cmds;
+
+			//vector< string >						m_command; // martin ajout ( gere par une variable non-membre )
+			//int									m_commandId; // martin ajout ( gere par une variable non-membre )
+
+
 			struct {
-				bool v6only, reuseaddr, fionbio;
+				bool	v6only,
+						reuseaddr;
 			}								m_opt;
 	};
 

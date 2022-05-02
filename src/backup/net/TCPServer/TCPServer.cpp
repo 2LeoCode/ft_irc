@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/11 18:57:26 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/04/29 16:21:42 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/02 21:00:20 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,21 +55,17 @@ namespace net {
 
 	TCPServer	&TCPServer::bind( short port )
 	{
-		m_sockaddr.sin6_family = AF_INET6;
-		memcpy(&m_sockaddr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
-		m_sockaddr.sin6_port = htons(port);
+		
 
 		// Assign address and port to the server socket
-		if (::bind(m_sockfd, (sockaddr*)&m_sockaddr, sizeof(m_sockaddr)))
+		if (::)
 			throw std::runtime_error("bind");
 		return *this;
 	}
 
 	TCPServer	&TCPServer::listen( int backlog )
 	{
-		// Make socket able to receive connections and set the
-		// maximum length to which the queue of pending connections
-		// for sockfd may grow (backlog)
+		
 		if (::listen(m_sockfd, backlog))
 			throw std::runtime_error("listen");
 		return *this;
@@ -113,7 +109,7 @@ namespace net {
 		// Push the new socket inside the pollfd vector used in `poll`
 		m_fds.push_back((pollfd){ fd, POLLIN });
 		m_pending.push_back("");
-		return (TCPClient){ client_addr, len, fd };
+		return (TCPClient) { client_addr, len, fd };
 	}
 
 	int		TCPServer::recv( unsigned id )
