@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/02 21:32:28 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/07 17:04:26 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,18 @@ namespace irc
 			close(it->fd);
 	}
 
+	
+
 	Server::Server( short port, string pass, int protocol, int backlog )
+	:	m_sockfd(0)
 	{
+		open(port, pass, protocol, backlog);
+	}
+
+	Server	&Server::open( short port, string pass, int protocol, int backlog )
+	{
+		if (m_sockfd)
+			throw std::runtime_error("Server already opened");
 		m_init(socket(AF_INET6, SOCK_STREAM, protocol));
 		if (m_sockfd == -1)
 			throw std::runtime_error(strerror(errno));
@@ -71,7 +81,7 @@ namespace irc
 		// push the socket fd to the pollfd array used in `poll`
 		m_pollfd.reserve(100);
 		m_pollfd.push_back((pollfd){ m_sockfd, POLLIN });
-
+		return *this;
 	}
 
 	void	Server::loop( void )
@@ -136,8 +146,6 @@ namespace irc
 
 	void	Server::m_recv( int fd )
 	{
-		typedef vector< pollfd >::iterator	iter;
-
 		static char	buf[BUFFER_SIZE + 1] = { 0 };
 		int			ret;
 
@@ -160,19 +168,7 @@ namespace irc
 
 			// If recv returned 0 it means that the client closed connection
 			else if (!ret)
-			{
-				iter	it = m_pollfd.begin();
-
-				// Search for the client inside the pollfd array
-				while (it != m_pollfd.end() && it->fd != fd)
-					++it;
-
-				// Erase it totally from the server
-				m_pollfd.erase(it);
-				m_pending.erase(fd);
-				m_cmds.erase(fd);
-				m_clients.erase(fd);
-			}
+				m_kickClient(m_clients[fd]);
 
 			// Otherwise we read something, so we append it
 			// to the pending buffer
@@ -191,10 +187,55 @@ namespace irc
 			throw std::runtime_error(strerror(errno));
 	}
 
-	void	Server::m_init( int sockfd = -1 ) {
+	void	Server::m_init( int sockfd = -1 )
+	{
+		static bool	dummy = m_init_exec();
 		m_sockfd = sockfd;
 		m_opt.reuseaddr = true;
 		m_opt.v6only = true;
+	}
+
+	bool	Server::m_init_exec( void )
+	{
+		m_execs.insert("CAP", m_execCap)
+			.insert("PASS", m_execPass)
+			.insert("NICK", m_execNick)
+			.insert("USER", m_execUser)
+			.insert("OPER", m_execOper)
+			.insert("DIE", m_execDie)
+			.insert("GLOBOPS", m_execGlobops)
+			.insert("HELP", m_execHelp)
+			.insert("IMPORTMOTD", m_execImportmotd)
+			.insert("INFO", m_execInfo)
+			.insert("INVITE", m_execInvite)
+			.insert("ISBANNED", m_execIsbanned)
+			.insert("ISON", m_execIson)
+			.insert("KILL", m_execKill)
+			.insert("KILLBAN", m_execKillban)
+			.insert("UNBAN", m_execUnban)
+			.insert("SHUN", m_execShun)
+			.insert("LIST", m_execList)
+			.insert("MODE", m_execMode)
+			.insert("JOIN", m_execJoin)
+			.insert("KICK", m_execKick)
+			.insert("SETNAME", m_execSetname)
+			.insert("PART", m_execPart)
+			.insert("MSG", m_execMsg)
+			.insert("PRIVMSG", m_execMsg)
+			.insert("QUIT", m_execQuit)
+			.insert("BYE", m_execQuit)
+			.insert("ME", m_execMe)
+			.insert("NOTICE", m_execNotice)
+			.insert("NAMES", m_execNames)
+			.insert("TIME", m_execTime)
+			.insert("TOPIC", m_execTopic)
+			.insert("USERHOST", m_execUserhost)
+			.insert("VERSION", m_execVersion)
+			.insert("WALL", m_execWall)
+			.insert("WALLOPS", m_execWallops)
+			.insert("WHO", m_execWho)
+			.insert("RESTART", m_execRestart);
+		return false;
 	}
 
 	// martin ajout
@@ -214,21 +255,21 @@ namespace irc
 	}
 
 	// martin ajout
-	int Server::m_execCommand( const vector< string > &command )
+	int Server::m_execCommand( Client &sender, const vector< string > &command )
 	{
-		int	id = -1;
-	
-		for (unsigned i = 0; i < CMD_COUNT; i++)
+		int			id = -1;
+		const char	*cmd_name = command.begin()->data();
+
+		if (!sender.isLogged() && sender.expected != cmd_name)
+			m_kickClient(sender);
+		try
 		{
-			if (!command[0].compare(cmdTab[i]))
-			{
-				id = i;
-				cout << "executing ID " << i << endl;
-				return (0);
-			}
+			(this->*m_execs.at(cmd_name))(sender, command);
 		}
-	
-		cout << "unknown command" << endl;
+		catch ( const std::exception &e )
+		{
+			cout << "unknown command" << endl;
+		}
 		return (-1);
 	}
 
@@ -263,11 +304,50 @@ namespace irc
 		{
 			while (!it->second.empty())
 			{
-				m_execCommand(it->second.front());
+				m_execCommand(m_clients[it->first], it->second.front());
 				it->second.pop();
 			}
 		}
 		m_cmds.clear();
+	}
+
+	void	Server::m_kickClient( Client &client )
+	{
+		typedef vector< pollfd >::iterator	iter;
+
+		iter	it = m_pollfd.begin();
+	
+		// Search for the client inside the pollfd array
+		while (it != m_pollfd.end() && it->fd != client.sockfd)
+			++it;
+
+		// Erase it totally from the server
+		m_pending.erase(it->fd);
+		m_cmds.erase(it->fd);
+		m_clients.erase(it->fd);
+		m_pollfd.erase(it);
+	}
+
+	int	Server::m_execCap( Client &sender, const vector<string> &arg )
+	{
+		ostringstream	response;
+
+		if (sender.isLogged())
+		{
+			response << ':' << m_name << ' ' << ERR_ALREADYREGISTRED
+				<< " * :You may not reregister";
+		}
+		else if (!sender.logLevel())
+		{
+			if (arg.size() < 2)
+				response << ':' << m_name << ' ' << ERR_NEEDMOREPARAMS
+					<< " * CAP :Not enough parameters";
+			else if (arg[2] != "LS")
+				response << ':' << m_name << ' ' << ERR_INVALIDCAPCMD
+					<< " * CAP :Invalid sub-command";
+			sender.
+		}
+		else if (sender.log)
 	}
 
 }

@@ -63,6 +63,15 @@ main (int argc, char *argv[])
   addr.sin6_family      = AF_INET6;
   memcpy(&addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
   addr.sin6_port        = htons(SERVER_PORT);
+  char host[1025] = { 0 };
+  char serv[1025] = { 0 };
+
+  int info =  getnameinfo((struct sockaddr*)&addr, sizeof(addr),
+                host, 1024,
+                serv, 1024, 0);
+
+  return 0;
+
   rc = bind(listen_sd,
             (struct sockaddr *)&addr, sizeof(addr));
   if (rc < 0)

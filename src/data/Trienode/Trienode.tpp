@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:03:27 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/03/24 00:30:06 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/03 23:01:59 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +28,15 @@ namespace data
 {
 
 	CONSTRUCTOR( const Allocator &alloc )
-	:	m_alloc(alloc),
-		m_data(NULL)
+	:	m_alloc( alloc ),
+		m_data( NULL )
 	{
 		clear();
 	}
 
 	CONSTRUCTOR( const Trienode &other )
-	:	m_alloc(other.m_alloc),
-		m_data(NULL)
+	:	m_alloc( other.m_alloc ),
+		m_data( NULL )
 	{
 		clear();
 		if (other.m_data)
@@ -47,8 +47,8 @@ namespace data
 	}
 
 	CONSTRUCTOR( T &value, const Allocator &alloc )
-	:	m_alloc(alloc),
-		m_data(m_alloc.allocate(1))
+	:	m_alloc( alloc ),
+		m_data( m_alloc.allocate(1) )
 	{
 		clear();
 		m_alloc.construct(m_data, value);

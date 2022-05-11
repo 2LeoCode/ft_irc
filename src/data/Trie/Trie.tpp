@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 21:08:38 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/03/24 00:50:52 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/03 23:02:25 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,13 +28,13 @@ namespace data
 {
 
 	CONSTRUCTOR( const Allocator &alloc )
-	:	m_size(0),
-		m_root(alloc)
+	:	m_size( 0 ),
+		m_root( alloc )
 	{ }
 
 	CONSTRUCTOR( const Trie &other )
-	:	m_size(other.m_size),
-		m_root(other.m_root.get_allocator())
+	:	m_size( other.m_size ),
+		m_root( other.m_root.get_allocator() )
 	{
 		m_copy(&other.m_root);
 	}

@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 23:34:51 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/03/24 00:13:09 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/03 23:01:28 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ namespace data
 {
 
 	template < class T, class Allocator = std::allocator< T > >
-	class Trienode {
+	class Trienode
+	{
 		public:
 			Trienode( const Allocator& = Allocator() );
 			Trienode( const Trienode& );

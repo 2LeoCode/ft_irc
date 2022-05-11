@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:49 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/04/29 18:48:08 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/07 17:02:25 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,16 +18,40 @@
 namespace irc
 {
 
-	Client::Client( int sockfd, sockaddr_in6 &addr )
-	:	m_sockfd(sockfd),
-		m_addr(addr)
+	Client::Client( int fd, sockaddr_in6 &addr )
+	:	sockfd( fd ),
+		expected( "CAP" ),
+		m_addr( addr ),
+		m_logged( false ),
+		m_modes( 0 )
 	{ }
 
 	Client::~Client( void )
+	{ }
+
+	void	Client::addMode( int mode )
 	{
-		delete m_username;
-		delete m_nickname;
-		delete m_realname;
+		m_modes |= mode;
+	}
+
+	void	Client::delMode( int mode )
+	{
+		m_modes &= ~mode;
+	}
+
+	bool	Client::hasMode( int mode ) const
+	{
+		return m_modes & mode;
+	}
+
+	bool	Client::isLogged( void ) const
+	{
+		return m_logged;
+	}
+
+	const sockaddr_in6	&Client::addr( void ) const
+	{
+		return m_addr;
 	}
 
 }
