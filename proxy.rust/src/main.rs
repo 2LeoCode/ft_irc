@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.rs                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 10:22:51 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/03/21 20:48:12 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/11 16:33:51 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,9 +47,16 @@ async fn	main() -> Result<(), Error>
 		{
 			let chan = seq!(N in 0..2 {(#(mpsc::channel(),)*)});
 			let handle = thread::spawn(move || {
+				let mut buffer = [0; 1024];
+				for stream in v[0].incoming()
 				while true
 				{
+   					stream.read(&mut buffer).await.unwrap();
+					chan.0.0.send(buffer).unwrap();
+					let received = chan.1.1.recv().unwrap();
 					
+    				v.write(response.as_bytes()).await.unwrap();
+    				stream.flush().await.unwrap();
 				}
 				// chan.0.0.send("lol").unwrap();
 				// let received = chan.1.1.recv().unwrap();
