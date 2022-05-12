@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/07 17:04:26 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/12 20:01:36 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,8 @@ namespace irc
 {
 
 	Server::Server( void )
-	{
-		m_init();
-	}
+	:	m_sockfd( -1 )
+	{ }
 
 	Server::~Server( void )
 	{
@@ -35,23 +34,68 @@ namespace irc
 			close(it->fd);
 	}
 
-	
-
-	Server::Server( short port, string pass, int protocol, int backlog )
+	Server::Server( string name, short port, string pass, int protocol, int backlog )
 	:	m_sockfd(0)
 	{
-		open(port, pass, protocol, backlog);
+		open(name, port, pass, protocol, backlog);
 	}
 
-	Server	&Server::open( short port, string pass, int protocol, int backlog )
+	Server	&Server::open( string name, short port, string pass, int protocol, int backlog )
 	{
 		if (m_sockfd)
 			throw std::runtime_error("Server already opened");
-		m_init(socket(AF_INET6, SOCK_STREAM, protocol));
-		if (m_sockfd == -1)
+
+		if ((m_sockfd = socket(AF_INET6, SOCK_STREAM, protocol)) == -1);
 			throw std::runtime_error(strerror(errno));
 
+		m_name = name;
+		m_execs.insert("CAP", m_execCap)
+			.insert("PASS", m_execPass)
+			.insert("NICK", m_execNick)
+			.insert("USER", m_execUser)
+			.insert("OPER", m_execOper)
+			.insert("DIE", m_execDie)
+			.insert("GLOBOPS", m_execGlobops)
+			.insert("HELP", m_execHelp)
+			.insert("IMPORTMOTD", m_execImportmotd)
+			.insert("INFO", m_execInfo)
+			.insert("INVITE", m_execInvite)
+			.insert("ISBANNED", m_execIsbanned)
+			.insert("ISON", m_execIson)
+			.insert("KILL", m_execKill)
+			.insert("KILLBAN", m_execKillban)
+			.insert("UNBAN", m_execUnban)
+			.insert("SHUN", m_execShun)
+			.insert("LIST", m_execList)
+			.insert("MODE", m_execMode)
+			.insert("JOIN", m_execJoin)
+			.insert("KICK", m_execKick)
+			.insert("SETNAME", m_execSetname)
+			.insert("PART", m_execPart)
+			.insert("PRIVMSG", m_execPrivmsg)
+			.insert("QUIT", m_execQuit)
+			.insert("BYE", m_execQuit)
+			.insert("ME", m_execMe)
+			.insert("NOTICE", m_execNotice)
+			.insert("NAMES", m_execNames)
+			.insert("TIME", m_execTime)
+			.insert("TOPIC", m_execTopic)
+			.insert("USERHOST", m_execUserhost)
+			.insert("VERSION", m_execVersion)
+			.insert("WALL", m_execWall)
+			.insert("WALLOPS", m_execWallops)
+			.insert("WHO", m_execWho)
+			.insert("REHASH", m_execRehash);
+
+		m_getMotd();
+		m_getHelpMsg();
+		m_getOps();
+
 		// Disable IPV6_V6ONLY flag to allow both IPv4 and IPv6
+
+		m_opt.v6only = false;
+		m_opt.reuseaddr = true;
+
 		if (setsockopt(m_sockfd, SOL_SOCKET, IPV6_V6ONLY, &m_opt.v6only, sizeof(bool))
 		
 		// Snable SO_REUSEADDR flag to be able to launch
@@ -144,6 +188,55 @@ namespace irc
 		}
 	}
 
+	void	Server::m_getMotd( void )
+	{
+		ifstream		in("config/motd.txt");
+		ostringstream	s;
+
+		if (!in)
+			throw std::runtime_error(strerror(errno));
+		s << in.rdbuf();
+		m_motd = s.str();
+	}
+
+	void	Server::m_getHelpMsg( void )
+	{
+		ifstream		in("config/helpmsg.txt");
+		ostringstream	s;
+
+		if (!in)
+			throw std::runtime_error(strerror(errno));
+		s << in.rdbuf();
+		m_helpmsg = s.str();
+	}
+
+	void	Server::m_getOps( void )
+	{
+		ifstream		in("config/ops.list");
+		string			line, name, pass;
+		char			c;
+
+		if (!in)
+			throw std::runtime_error(strerror(errno));
+		while (std::getline(in, line))
+		{
+			size_t pos;
+
+    		while ((pos = line.find('\'')) != string::npos)
+       			line.replace(pos, 1, " ");
+
+			istringstream is(line);
+
+			is >> name >> pass;
+			try
+			{
+				m_operators.insert(name.data(), pass);
+			}
+			catch (...)
+			{ }
+		}
+	}
+
 	void	Server::m_recv( int fd )
 	{
 		static char	buf[BUFFER_SIZE + 1] = { 0 };
@@ -187,57 +280,6 @@ namespace irc
 			throw std::runtime_error(strerror(errno));
 	}
 
-	void	Server::m_init( int sockfd = -1 )
-	{
-		static bool	dummy = m_init_exec();
-		m_sockfd = sockfd;
-		m_opt.reuseaddr = true;
-		m_opt.v6only = true;
-	}
-
-	bool	Server::m_init_exec( void )
-	{
-		m_execs.insert("CAP", m_execCap)
-			.insert("PASS", m_execPass)
-			.insert("NICK", m_execNick)
-			.insert("USER", m_execUser)
-			.insert("OPER", m_execOper)
-			.insert("DIE", m_execDie)
-			.insert("GLOBOPS", m_execGlobops)
-			.insert("HELP", m_execHelp)
-			.insert("IMPORTMOTD", m_execImportmotd)
-			.insert("INFO", m_execInfo)
-			.insert("INVITE", m_execInvite)
-			.insert("ISBANNED", m_execIsbanned)
-			.insert("ISON", m_execIson)
-			.insert("KILL", m_execKill)
-			.insert("KILLBAN", m_execKillban)
-			.insert("UNBAN", m_execUnban)
-			.insert("SHUN", m_execShun)
-			.insert("LIST", m_execList)
-			.insert("MODE", m_execMode)
-			.insert("JOIN", m_execJoin)
-			.insert("KICK", m_execKick)
-			.insert("SETNAME", m_execSetname)
-			.insert("PART", m_execPart)
-			.insert("MSG", m_execMsg)
-			.insert("PRIVMSG", m_execMsg)
-			.insert("QUIT", m_execQuit)
-			.insert("BYE", m_execQuit)
-			.insert("ME", m_execMe)
-			.insert("NOTICE", m_execNotice)
-			.insert("NAMES", m_execNames)
-			.insert("TIME", m_execTime)
-			.insert("TOPIC", m_execTopic)
-			.insert("USERHOST", m_execUserhost)
-			.insert("VERSION", m_execVersion)
-			.insert("WALL", m_execWall)
-			.insert("WALLOPS", m_execWallops)
-			.insert("WHO", m_execWho)
-			.insert("RESTART", m_execRestart);
-		return false;
-	}
-
 	// martin ajout
 	vector< string > Server::m_parseCommand(const string &rawCommand)
 	{
@@ -260,8 +302,6 @@ namespace irc
 		int			id = -1;
 		const char	*cmd_name = command.begin()->data();
 
-		if (!sender.isLogged() && sender.expected != cmd_name)
-			m_kickClient(sender);
 		try
 		{
 			(this->*m_execs.at(cmd_name))(sender, command);
@@ -328,26 +368,96 @@ namespace irc
 		m_pollfd.erase(it);
 	}
 
-	int	Server::m_execCap( Client &sender, const vector<string> &arg )
+	bool	Server::m_isLogged( const Client &c ) const
+	{
+		return !(c.nickname.empty() || c.username.empty()) && c.lastpass == m_password;
+	}
+
+	void	Server::m_execCap( Client &sender, const vector<string> &arg )
 	{
 		ostringstream	response;
 
-		if (sender.isLogged())
-		{
-			response << ':' << m_name << ' ' << ERR_ALREADYREGISTRED
-				<< " * :You may not reregister";
-		}
-		else if (!sender.logLevel())
-		{
-			if (arg.size() < 2)
-				response << ':' << m_name << ' ' << ERR_NEEDMOREPARAMS
-					<< " * CAP :Not enough parameters";
-			else if (arg[2] != "LS")
-				response << ':' << m_name << ' ' << ERR_INVALIDCAPCMD
-					<< " * CAP :Invalid sub-command";
-			sender.
-		}
-		else if (sender.log)
+		response << ':' << m_name << ' ';
+		if (arg.size() < 2)
+			response << ERR_NEEDMOREPARAMS << " * CAP :Not enough parameters";
+		else if (arg[1] == "LS")
+			response << "CAP * LS :";
+		else if (arg[1] == "END")
+			return ;
+		else
+			response << ERR_INVALIDCAPCMD << " * " << arg[2] << " :Invalid CAP sub-command";
+		response << "\r\n";
+		m_send(sender.sockfd, response.str());
 	}
 
+	void	Server::m_execPass( Client &sender, const vector<string> &arg )
+	{
+		ostringstream	response;
+
+		response << ':' << m_name << ' ';
+		if (m_isLogged(sender))
+			response << ERR_ALREADYREGISTRED << " * PASS :You may not reregister";
+		else if (arg.size() < 2)
+			response << ERR_NEEDMOREPARAMS << " * PASS :Not enough parameters";
+		else
+		{
+			sender.lastpass = arg[1];
+			return ;
+		}
+		response << "\r\n";
+		m_send(sender.sockfd, response.str());
+	}
+
+	void	Server::m_execNick( Client &sender, const vector<string> &arg )
+	{
+		ostringstream	response;
+
+		response << ':' << m_name << ' ';
+		if (arg.size() < 2)
+			response << ERR_NONICKNAMEGIVEN << " * NICK :No nickname given";
+		else if (arg[1].length() > 9 || arg[1].find_first_not_of(g_nickCharset))
+			response << ERR_ERRONEUSNICKNAME << " * " << arg[1] << " :Erroneus nickname";
+		else
+		{
+			map<int, Client>::const_iterator it = m_clients.begin();
+			while (it != m_clients.end())
+			{
+				if (it->second.sockfd != sender.sockfd && it->second.nickname == arg[1])
+				{
+					response << ERR_NICKNAMEINUSE << " * " << arg[1] << " :Nickname is already in use";
+					break ;
+				}
+				++it;
+			}
+			if (it == m_clients.end())
+			{
+				sender.nickname = arg[1];
+				return ;
+			}
+		}
+		response << "\r\n";
+		m_send(sender.sockfd, response.str());
+	}
+
+	void	Server::m_execUser( Client &sender, const vector<string> &arg )
+	{
+		ostringstream	response;
+
+		response << ':' << m_name << ' ';
+		if (m_isLogged(sender))
+			response << ERR_ALREADYREGISTRED << " * USER :You may not reregister";
+		else if (arg.size() < 5)
+			response << ERR_NEEDMOREPARAMS << " * USER :Not enough parameters";
+		else
+		{
+			sender.username = arg[1];
+			sender.realname = arg[4];
+			if (*sender.realname.data() == ':')
+				sender.realname.erase(sender.realname.begin());
+			for (int i = 5; i < arg.size(); ++i)
+				sender.realname += " " + arg[i];
+		}
+		response << "\r\n";
+		m_send(sender.sockfd, response.str());
+	}
 }

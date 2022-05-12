@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   irc.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/11 14:26:16 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/05/07 17:07:44 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/12 18:25:07 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,11 @@
 #include <vector>
 #include <string>
 #include <queue>
+#include <fstream>
 #include <sstream>
 #include <set>
+#include <list>
+#include <algorithm>
 #include "../../data.hpp"
 
 // https://datatracker.ietf.org/doc/html/rfc1459#section-6
@@ -158,10 +161,14 @@ namespace irc
 	using std::map;
 	using std::queue;
 	using std::set;
+	using std::list;
 	using std::pair;
+	using std::count;
 	using std::cout;
 	using std::endl;
 	using std::ostringstream;
+	using std::istringstream;
+	using std::ifstream;
 	using data::Trie;
 }
 

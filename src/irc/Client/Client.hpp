@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:55 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/07 17:01:54 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/12 18:02:42 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@
 #define MODE_SERVERLOG (1 << 6)
 #define MODE_WALLOPSLOG (1 << 7)
 
+char	g_nickCharset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789-_[]{}\\`|";
+
 namespace irc
 {
 
@@ -34,12 +36,13 @@ namespace irc
 			Client( int, sockaddr_in6& );
 			~Client( void );
 
-			int				sockfd;
-			string			username,
-							nickname,
-							hostname,
-							realname,
-							expected;
+			int					sockfd;
+			string				username,
+								nickname,
+								hostname,
+								realname,
+								lastpass,
+								lastping;
 
 			const sockaddr_in6	&addr( void ) const;
 
@@ -47,13 +50,9 @@ namespace irc
 			void				delMode( int );
 			bool				hasMode( int ) const;
 
-			bool				isLogged( void ) const;
-
 		private:
 			sockaddr_in6		m_addr;
-			bool				m_logged;
 			unsigned			m_modes;
-			string				m_ping, m_pong;
 			Trie< Channel* >	m_curChans;
 			Trie< Channel* >	m_invites;
 	};

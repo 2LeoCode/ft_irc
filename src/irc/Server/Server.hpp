@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/07 18:39:36 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/12 18:06:33 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,17 +18,15 @@
 
 #include "../../irc.hpp"
 
-#define CMD_COUNT 10
-
 namespace irc {
 
 	class Server {
 		public:
 			Server( void );
-			Server( short, string, int = 0, int = 32 );
+			Server( string, short, string, int = 0, int = 32 );
 			~Server();
 
-			Server		&open( short, string, int = 0, int = 32 );
+			Server		&open( string, short, string, int = 0, int = 32 );
 			void		loop( void );
 
 
@@ -36,6 +34,10 @@ namespace irc {
 
 		private:
 
+			void		m_getMotd( void );
+			void		m_getHelpMsg( void );
+			void		m_getOps( void );
+			bool		m_isLogged( const Client& ) const;
 			void		m_send( int, const std::string& );
 			//int		send( const std::string&, const std::string& ); Implementer si besoin
 			void		m_recv( int );
@@ -47,50 +49,46 @@ namespace irc {
 			int					m_execCommand( Client&, const vector< string >& ); // martin ajout
 
 			// martin ajout
-			int			m_execCap( Client&, const vector<string>& );
-			int			m_execPass( Client&, const vector<string>& );
-			int			m_execNick( Client&, const vector<string>& );
-			int			m_execUser( Client&, const vector<string>& );
-			int			m_execOper( Client&, const vector<string>& );
-			int			m_execDie( Client&, const vector<string>& );
-			int			m_execGlobops( Client&, const vector<string>& );
-			int			m_execHelp( Client&, const std::vector<string>& );
-			int			m_execImportmotd( Client&, const vector<string>& );
-			int			m_execInfo( Client&, const vector<string>& );
-			int			m_execInvite( Client&, const vector<string>& );
-			int			m_execIsbanned( Client&, const vector<string>& );
-			int			m_execIson( Client&, const vector<string>& );
-			int			m_execKill( Client&, const vector<string>& );
-			int			m_execKillban( Client&, const vector<string>& );
-			int			m_execUnban( Client&, const vector<string>& );
-			int			m_execShun( Client&, const vector<string>& );
-			int			m_execList( Client&, const vector<string>& );
-			int			m_execMode( Client&, const vector<string>& );
-			int			m_execJoin( Client&, const vector<string>& );
-			int			m_execKick( Client&, const vector<string>& );
-			int			m_execSetname( Client&, const vector<string>& );
-			int			m_execPart( Client&, const vector<string>& );
-			int			m_execQuit( Client&, const vector<string>& );
-			int			m_execMe( Client&, const vector<string>& );
-			int			m_execMsg( Client&, const vector<string>& );
-			int			m_execNotice( Client&, const vector<string>& );
-			int			m_execNames( Client&, const vector<string>& );
-			int			m_execTime( Client&, const vector<string>& );
-			int			m_execTopic( Client&, const vector<string>& );
-			int			m_execUserhost( Client&, const vector<string>& );
-			int			m_execVersion( Client&, const vector<string>& );
-			int			m_execWall( Client&, const vector<string>& );
-			int			m_execWallops( Client&, const vector<string>& );
-			int			m_execWho( Client&, const vector<string>& );
-			int			m_execRestart( Client&, const vector<string>& );
-			void		m_init( int m_sockfd = -1 );
-
-			bool		m_init_exec( void );
+			void		m_execCap( Client&, const vector<string>& );
+			void		m_execPass( Client&, const vector<string>& );
+			void		m_execNick( Client&, const vector<string>& );
+			void		m_execUser( Client&, const vector<string>& );
+			void		m_execOper( Client&, const vector<string>& );
+			void		m_execDie( Client&, const vector<string>& );
+			void		m_execGlobops( Client&, const vector<string>& );
+			void		m_execHelp( Client&, const std::vector<string>& );
+			void		m_execImportmotd( Client&, const vector<string>& );
+			void		m_execInfo( Client&, const vector<string>& );
+			void		m_execInvite( Client&, const vector<string>& );
+			void		m_execIsbanned( Client&, const vector<string>& );
+			void		m_execIson( Client&, const vector<string>& );
+			void		m_execKill( Client&, const vector<string>& );
+			void		m_execKillban( Client&, const vector<string>& );
+			void		m_execUnban( Client&, const vector<string>& );
+			void		m_execShun( Client&, const vector<string>& );
+			void		m_execList( Client&, const vector<string>& );
+			void		m_execMode( Client&, const vector<string>& );
+			void		m_execJoin( Client&, const vector<string>& );
+			void		m_execKick( Client&, const vector<string>& );
+			void		m_execSetname( Client&, const vector<string>& );
+			void		m_execPart( Client&, const vector<string>& );
+			void		m_execQuit( Client&, const vector<string>& );
+			void		m_execMe( Client&, const vector<string>& );
+			void		m_execPrivmsg( Client&, const vector<string>& );
+			void		m_execNotice( Client&, const vector<string>& );
+			void		m_execNames( Client&, const vector<string>& );
+			void		m_execTime( Client&, const vector<string>& );
+			void		m_execTopic( Client&, const vector<string>& );
+			void		m_execUserhost( Client&, const vector<string>& );
+			void		m_execVersion( Client&, const vector<string>& );
+			void		m_execWall( Client&, const vector<string>& );
+			void		m_execWallops( Client&, const vector<string>& );
+			void		m_execWho( Client&, const vector<string>& );
+			void		m_execRehash( Client&, const vector<string>& );
 
 			int										m_sockfd;
 			sockaddr_in6							m_addr;
 			string									m_name,
-													m_version,
 													m_helpmsg,
 													m_motd,
 													m_password;
@@ -102,15 +100,15 @@ namespace irc {
 			map< int, queue< vector < string > > >	m_cmds;
 
 			Trie< string >							m_operators;
-			set< sockaddr_in6 >						m_banned;
-			set< sockaddr_in6 >						m_muted;
+			set< string >							m_banned;
+			set< string	>							m_muted;
 			//vector< string >						m_command; // martin ajout ( gere par une variable non-membre )
 			//int									m_commandId; // martin ajout ( gere par une variable non-membre )
 
-			typedef int	(Server::*ExecFun)( Client&, const vector<string>& );
-			static Trie< ExecFun > 					m_execs;
+			typedef void	(Server::*ExecFun)( Client&, const vector<string>& );
+			Trie< ExecFun > 						m_execs;
 
-			static Trie< sockaddr_in6 >				m_hostnames;
+			map< sockaddr_in6, string >				m_hostnames;
 
 			struct {
 				bool	v6only,

@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/11 16:34:44 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/05/11 20:15:10 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/12 10:58:48 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include <vector>
+#include <algorithm>
 
 #define BUFSIZE 2048
 
@@ -68,7 +69,8 @@ int		main( int argc, char **argv ) {
 
 	short serv_p, proxy_p;
 	sockaddr_in serv_addr = { 0 }, proxy_addr = { 0 };
-	std::vector< pollfd > lfds, sfds, gfds;
+	std::vector< pollfd > gfds;
+	std::vector< int >	lfds, sfds;
 	int proxy_fd;
 	char buf[BUFSIZE + 1];
 
@@ -90,57 +92,54 @@ int		main( int argc, char **argv ) {
 	bind(proxy_fd, (sockaddr*)&proxy_addr, sizeof(proxy_addr));
 	listen(proxy_fd, 32);
 
-	lfds.push_back((pollfd){proxy_fd, POLLIN, 0});
+	gfds.push_back((pollfd){proxy_fd, POLLIN, 0});
 
-	static int i = 0;
+	printf("Waiting for connection on port %hd\n", proxy_p);
 	while (true) {
-		if (++i == 6) abort();
-		printf("Waiting for connection on port %hd\n", proxy_p);
-
-		gfds = lfds + sfds;
 		int ret = poll(gfds.data(), gfds.size(), -1);
-		if (lfds[0].revents == POLLIN) {
+		if (gfds[0].revents == POLLIN) {
 			int	new_fd = accept(proxy_fd, NULL, NULL);
-			lfds.push_back((pollfd){new_fd, POLLIN, 0});
+			gfds.push_back((pollfd){new_fd, POLLIN, 0});
+			lfds.push_back(new_fd);
 
 			int	serv_fd = socket(AF_INET, SOCK_STREAM, 0);
 			set_nonblock(serv_fd);
 			connect(serv_fd, (sockaddr*)&serv_addr, sizeof(serv_addr));
-			sfds.push_back((pollfd){serv_fd, POLLIN, 0});
+			gfds.push_back((pollfd){serv_fd, POLLIN, 0});
+			sfds.push_back(serv_fd);
 		}
-		for (int i = 1; i < lfds.size(); ++i) {
-			if (lfds[i].revents == POLLIN) {
-				int	rret = recv(lfds[i].fd, buf, BUFSIZE, 0);
+		for (int i = 1; i < gfds.size(); ++i) {
+			if (gfds[i].revents == POLLIN) {
+				int	rret = recv(gfds[i].fd, buf, BUFSIZE, 0);
 				if (rret < 0) {
 					if (errno != EWOULDBLOCK) {
 						perror("recv");
 						exit(EXIT_FAILURE);
 					}
 				} else if (rret == 0) {
-					printf("Client %d disconnected\n", i);
-					close(lfds[i].fd);
-					close(sfds[i - 1].fd);
-					lfds.erase(lfds.begin() + i);
-					sfds.erase(sfds.begin() + i - 1);
+					auto id = std::find(lfds.begin(), lfds.end(), gfds[i].fd) - lfds.begin();
+					printf("Client %zu disconnected\n", id);
+					close(lfds[id]);
+					close(sfds[id]);
+					gfds.erase(gfds.begin() + i);
+					lfds.erase(lfds.begin() + id);
+					sfds.erase(sfds.begin() + id);
 				} else {
 					buf[rret] = 0;
-					printf("Client %d sent %d bytes:\n\n%s\n", i, rret, buf);
-					send(sfds[i - 1].fd, buf, rret, 0);
-				}
-			}
-		}
-		for (int i = 0; i < sfds.size(); ++i) {
-			if (sfds[i].revents == POLLIN) {
-				int rret = recv(sfds[i].fd, buf, BUFSIZE, 0);
-				if (rret < 0) {
-					if (errno != EWOULDBLOCK) {
-						perror("recv");
-						exit(EXIT_FAILURE);
+
+					auto lit = std::find(lfds.begin(), lfds.end(), gfds[i].fd);
+					auto sit = std::find(sfds.begin(), sfds.end(), gfds[i].fd);
+					ptrdiff_t id;
+
+					if (lit != lfds.end()) {
+						id = lit - lfds.begin();
+						printf("Client %zu sent %d bytes to server:\n\n%s\n", id, rret, buf);
+						send(sfds[id], buf, rret, 0);
+					} else {
+						id = sit - sfds.begin();
+						printf("Server sent %d bytes to client %zu:\n\n%s\n", rret, id, buf);
+						send(lfds[id], buf, rret, 0);
 					}
-				} else {
-					buf[rret] = 0;
-					printf("Server sent %d bytes to client %d:\n\n%s\n", rret, i + 1, buf);
-					send(lfds[i + 1].fd, buf, rret, 0);
 				}
 			}
 		}
