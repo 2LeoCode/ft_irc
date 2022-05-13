@@ -56,7 +56,9 @@ namespace irc {
 			void		m_execPass( Client&, const vector<string>& );
 			void		m_execNick( Client&, const vector<string>& );
 			void		m_execUser( Client&, const vector<string>& );
+			void		m_execPing( Client&, const vector<string>& );
 			void		m_execOper( Client&, const vector<string>& );
+
 			void		m_execDie( Client&, const vector<string>& );
 			void		m_execGlobops( Client&, const vector<string>& );
 			void		m_execHelp( Client&, const std::vector<string>& );

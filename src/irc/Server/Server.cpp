@@ -53,7 +53,9 @@ namespace irc
 		m_execs.insert("CAP", &Server::m_execCap)
 			.insert("PASS", &Server::m_execPass)
 			.insert("NICK", &Server::m_execNick)
-			.insert("USER", &Server::m_execUser);
+			.insert("USER", &Server::m_execUser)
+			.insert("PING", &Server::m_execPing);
+			//.insert("PONG", &Server::m_execPong);
 			//.insert("OPER", &Server::m_execOper)
 			//.insert("DIE", &Server::m_execDie)
 			//.insert("GLOBOPS", &Server::m_execGlobops)
@@ -483,6 +485,23 @@ namespace irc
 			for (size_t i = 5; i < arg.size(); ++i)
 				sender.realname += " " + arg[i];
 			return ;
+		}
+		response << "\r\n";
+		m_appendToSend(sender.sockfd, response.str());
+	}
+
+	void	Server::m_execPing( Client &sender, const vector<string> &arg )
+	{
+		ostringstream	response;
+
+		response << ':' << m_name << ' ';
+		if (arg.size() < 2)
+			response << ERR_NEEDMOREPARAMS << " * PING :Not enough parameters";
+		else if (!m_isLogged(sender))
+			response << ERR_NOTREGISTERED << " * PING :You have not registered";
+		else
+		{
+			response << "PONG :" << arg[1].substr(0, 256);
 		}
 		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
