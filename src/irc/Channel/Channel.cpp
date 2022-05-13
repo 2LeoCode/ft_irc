@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 01:01:01 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/07 17:33:49 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/13 11:26:10 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,25 +41,17 @@ namespace irc
 
 	bool	Channel::isBanned( const Client &c ) const
 	{
-		return m_banned.find(c.addr()) != m_banned.end();
+		return m_banned.find(c.addr().sin6_addr) != m_banned.end();
 	}
 
 	bool	Channel::isVoiced( const Client &c ) const
 	{
-		return m_voiced.find(c.addr()) != m_voiced.end();
+		return m_voiced.find(c.addr().sin6_addr) != m_voiced.end();
 	}
 
 	bool	Channel::isOperator( const Client &c ) const
 	{
-		try
-		{
-			m_operators.at(c.nickname.data());
-		}
-		catch (...)
-		{
-			return false;
-		}
-		return true;
+		return m_operators.find(c.addr().sin6_addr) != m_operators.end();
 	}
 
 }

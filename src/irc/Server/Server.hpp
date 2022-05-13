@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/12 18:06:33 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/13 16:57:25 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ namespace irc {
 
 
 			struct ShutdownEvent { }; // We throw this object to turn off the server
+			struct ClientDisconnectEvent { };
 
 		private:
 
@@ -47,6 +48,8 @@ namespace irc {
 
 			vector< string >	m_parseCommand( const std::string& ); // martin ajout
 			int					m_execCommand( Client&, const vector< string >& ); // martin ajout
+
+			void		m_appendToSend( int, const string& );
 
 			// martin ajout
 			void		m_execCap( Client&, const vector<string>& );
@@ -97,6 +100,7 @@ namespace irc {
 			vector< Channel >						m_channels;
 
 			map< int, string >						m_pending;
+			map< int, string >						m_tosend;
 			map< int, queue< vector < string > > >	m_cmds;
 
 			Trie< string >							m_operators;
@@ -111,8 +115,7 @@ namespace irc {
 			map< sockaddr_in6, string >				m_hostnames;
 
 			struct {
-				bool	v6only,
-						reuseaddr;
+				int		reuseaddr;
 			}										m_opt;
 	};
 

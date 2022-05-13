@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Trienode.tpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:03:27 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/03 23:01:59 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/13 13:13:54 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,6 +119,10 @@ namespace data
 		return const_cast< const TYPE*& >(m_children[pos]);
 	}
 
+	MEMBER( Allocator, get_allocator )( void ) const
+	{
+		return m_alloc;
+	}
 
 	// Modifiers
 

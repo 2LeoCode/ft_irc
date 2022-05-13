@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:49 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/12 17:02:31 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/13 13:09:33 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include <cstring>
 #include <stdexcept>
 #include <cerrno>
+
+char	g_nickCharset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789-_[]{}\\`|";
 
 namespace irc
 {

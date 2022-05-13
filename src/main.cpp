@@ -6,17 +6,11 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/22 23:58:32 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/11 20:04:53 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/13 13:14:50 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <sstream>
-#include <cstdlib>
-#include <climits>
-
 #include "data.hpp"
-#include "net.hpp"
 #include "irc.hpp"
 
 using irc::Server;
@@ -47,16 +41,16 @@ int	main( int argc, char **argv )
 
 	try
 	{
-		Server(port, password).loop();
+		Server("KEKserv", port, password).loop();
 	}
 	catch (const std::exception &e)
 	{
-		cout << e.what() << endl;
+		cout << "Exception caught: " << e.what() << endl;
 		return -1;
 	}
 	catch (Server::ShutdownEvent &e)
 	{
-		cout << "Server is shutting down" << endl;
+		cout << "Server is shutting down..." << endl;
 	}
 	return 0;
 }

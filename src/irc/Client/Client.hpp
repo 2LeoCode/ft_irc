@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:55 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/12 18:02:42 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/13 17:01:02 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,16 +25,18 @@
 #define MODE_SERVERLOG (1 << 6)
 #define MODE_WALLOPSLOG (1 << 7)
 
-char	g_nickCharset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789-_[]{}\\`|";
+extern char g_nickCharset[];
 
 namespace irc
 {
+
+	class Channel;
 
 	class Client
 	{
 		public:
 			Client( int, sockaddr_in6& );
-			~Client( void );
+			~Client( void ); // erase client from all channels
 
 			int					sockfd;
 			string				username,

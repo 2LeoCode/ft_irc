@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:58:14 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/07 17:09:56 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/13 17:02:01 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,16 +27,17 @@
 
 namespace irc
 {
+	class Client;
 
 	class Channel
 	{
 		public:
 			Channel( void );
-			~Channel( void );
+			~Channel( void ); // erase channel from all clients
 
 			string					name;
 			string					password;
-			map< string, Client >	users;
+			map< string, Client* >	users;
 
 			void	addMode( int );
 			void	delMode( int );
@@ -64,9 +65,9 @@ namespace irc
 		private:
 			int						m_modes;
 			size_t					m_userLimit;
-			set< sockaddr_in6 >		m_voiced;
-			set< sockaddr_in6 >		m_operators;
-			set< sockaddr_in6 >		m_banned;
+			set< in6_addr >			m_voiced;
+			set< in6_addr >			m_operators;
+			set< in6_addr >			m_banned;
 	};
 
 }

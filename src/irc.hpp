@@ -6,12 +6,15 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/11 14:26:16 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/05/12 18:25:07 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/13 16:59:38 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include <iostream>
+#include <cstdlib>
+#include <climits>
 #include <map>
 #include <vector>
 #include <string>
@@ -21,7 +24,7 @@
 #include <set>
 #include <list>
 #include <algorithm>
-#include "../../data.hpp"
+#include "data.hpp"
 
 // https://datatracker.ietf.org/doc/html/rfc1459#section-6
 
@@ -165,6 +168,7 @@ namespace irc
 	using std::pair;
 	using std::count;
 	using std::cout;
+	using std::cerr;
 	using std::endl;
 	using std::ostringstream;
 	using std::istringstream;
@@ -172,6 +176,7 @@ namespace irc
 	using data::Trie;
 }
 
+#include "utils.hpp"
 #include "irc/Channel/Channel.hpp"
 #include "irc/Client/Client.hpp"
 #include "irc/Server/Server.hpp"

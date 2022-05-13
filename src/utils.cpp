@@ -1,24 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   data.hpp                                           :+:      :+:    :+:   */
+/*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/04/11 14:23:12 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/05/13 17:11:26 by lsuardi          ###   ########.fr       */
+/*   Created: 2022/05/13 11:28:37 by lsuardi           #+#    #+#             */
+/*   Updated: 2022/05/13 11:32:40 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+#include "utils.hpp"
 
-#include <iostream>
-
-namespace data {
-	using std::ostream;
+bool	operator <( const in6_addr &lhs, const in6_addr &rhs )
+{
+	return memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 }
-
-#include "data/exceptions.hpp"
-
-#include "data/Trienode/Trienode.hpp"
-#include "data/Trie/Trie.hpp"

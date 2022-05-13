@@ -15,7 +15,7 @@
 
 main (int argc, char *argv[])
 {
-  int    len, rc, on = 1;
+  int    len, rc, on = 1, off = 0;
   int    listen_sd = -1, new_sd = -1;
   int    desc_ready, end_server = FALSE, compress_array = FALSE;
   int    close_conn;
@@ -39,6 +39,14 @@ main (int argc, char *argv[])
   /*************************************************************/
   /* Allow socket descriptor to be reuseable                   */
   /*************************************************************/
+  rc = setsockopt(listen_sd, SOL_SOCKET,  IPV6_V6ONLY,
+                  (char *)&off, sizeof(off));
+  if (rc < 0)
+  {
+    perror("setsockopt() failed");
+    close(listen_sd);
+    exit(-1);
+  }
   rc = setsockopt(listen_sd, SOL_SOCKET,  SO_REUSEADDR,
                   (char *)&on, sizeof(on));
   if (rc < 0)

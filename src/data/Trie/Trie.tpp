@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Trie.tpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/15 21:08:38 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/05/03 23:02:25 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/13 14:35:51 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +28,16 @@ namespace data
 {
 
 	CONSTRUCTOR( const Allocator &alloc )
-	:	m_size( 0 ),
+	:	m_size( 
+		0 ),
 		m_root( alloc )
 	{ }
 
 	CONSTRUCTOR( const Trie &other )
 	:	m_size( other.m_size ),
-		m_root( other.m_root.get_allocator() )
+		m_root( other.m_root )
 	{
-		m_copy(&other.m_root);
+		m_copy(&m_root, &other.m_root);
 	}
 
 	DESTRUCTOR( void )
@@ -172,7 +173,7 @@ namespace data
 			if (other->children(i))
 			{
 				node->children(i) = m_alloc.allocate(1);
-				m_alloc.construct(node->children(i), (*other)[i].data());
+				m_alloc.construct(node->children(i), *other->children(i));
 				m_copy(node->children(i), other->children(i));
 			}
 		}
