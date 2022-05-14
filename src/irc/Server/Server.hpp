@@ -60,9 +60,9 @@ namespace irc {
 			void		m_execPing( Client&, const vector<string>& );
 			void		m_execOper( Client&, const vector<string>& );
 			void		m_execDie( Client&, const vector<string>& );
+			void		m_execKill( Client&, const vector<string>& );
 
 			// to be added
-			void		m_execKill( Client&, const vector<string>& );
 			void		m_execJoin( Client&, const vector<string>& );
 			void		m_execList( Client&, const vector<string>& );
 			void		m_execInvite( Client&, const vector<string>& );
