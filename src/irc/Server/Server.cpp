@@ -515,6 +515,9 @@ namespace irc
 		else if (m_operators.at(arg[1].data()) != arg[2])
 			response << ERR_PASSWDMISMATCH << " * OPER :Password incorrect";
 		else
+		{
+			sender.addMode(UMODE_OPERATOR);
 			response << RPL_YOUREOPER << " * OPER :You are now an IRC operator";
+		}
 	}
 }

@@ -61,16 +61,13 @@ namespace irc {
 
 			void		m_execDie( Client&, const vector<string>& );
 			void		m_execGlobops( Client&, const vector<string>& );
-			void		m_execHelp( Client&, const std::vector<string>& );
 			void		m_execImportmotd( Client&, const vector<string>& );
-			void		m_execInfo( Client&, const vector<string>& );
 			void		m_execInvite( Client&, const vector<string>& );
 			void		m_execIsbanned( Client&, const vector<string>& );
 			void		m_execIson( Client&, const vector<string>& );
 			void		m_execKill( Client&, const vector<string>& );
 			void		m_execKillban( Client&, const vector<string>& );
 			void		m_execUnban( Client&, const vector<string>& );
-			void		m_execShun( Client&, const vector<string>& );
 			void		m_execList( Client&, const vector<string>& );
 			void		m_execMode( Client&, const vector<string>& );
 			void		m_execJoin( Client&, const vector<string>& );
@@ -90,6 +87,10 @@ namespace irc {
 			void		m_execWallops( Client&, const vector<string>& );
 			void		m_execWho( Client&, const vector<string>& );
 			void		m_execRehash( Client&, const vector<string>& );
+			void		m_execShun( Client&, const vector<string>& );
+
+			void		m_execHelp( Client&, const std::vector<string>& );
+			void		m_execInfo( Client&, const vector<string>& );
 
 			int										m_sockfd;
 			sockaddr_in6							m_addr;
