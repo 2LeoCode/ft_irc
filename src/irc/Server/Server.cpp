@@ -543,9 +543,33 @@ namespace irc
 
 		response << ':' << m_name << ' ';
 		if (!sender.hasMode(UMODE_OPERATOR))
-			response << ERR_NOPRIVILEGES << " * DIE :You're not channel operator";
+			response << ERR_NOPRIVILEGES << " * :Permission Denied- You're not an IRC operator";
 		else
 			throw(ShutdownEvent());
+		response << "\r\n";
+		m_appendToSend(sender.sockfd, response.str());
+	}
+
+	void	Server::m_execKill( Client &sender, const vector<string> &arg )
+	{
+		ostringstream response;
+
+		response << ':' << m_name << ' ';
+		if (arg.size() < 2)
+			response << ERR_NEEDMOREPARAMS << " * KILL :Not enough parameters";
+		else if (!sender.hasMode(UMODE_OPERATOR))
+			response << ERR_NOPRIVILEGES << " * KILL :Permission Denied- You're not an IRC operator";
+		else if (!m_findClient(arg[1]))
+			response << ERR_NOSUCHNICK << " * KILL :" << arg[1] << "No such nick/channel";
+		else if (arg[1] == m_name)
+			response << ERR_CANTKILLSERVER << " * KILL :you cant kill a server!"; 
+		else
+		{
+			if (int var = m_findClient(arg[1]))
+				m_kickClient(m_clients[var]);
+			else
+				response << ERR_NOSUCHNICK << " * KILL :" << arg[1] << "No such nick/channel";
+		}
 		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}

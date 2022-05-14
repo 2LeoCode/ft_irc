@@ -45,29 +45,31 @@ namespace irc {
 			void		m_parsePending( void );
 			void		m_execCommandQueues( void );
 			void		m_kickClient( Client& );
+			int			m_findClient( const std::string &name );
 
 			vector< string >	m_parseCommand( const std::string& ); // martin ajout
 			int					m_execCommand( Client&, const vector< string >& ); // martin ajout
 
 			void		m_appendToSend( int, const string& );
 
-			// martin ajout
+			// added
 			void		m_execCap( Client&, const vector<string>& );
 			void		m_execPass( Client&, const vector<string>& );
 			void		m_execNick( Client&, const vector<string>& );
 			void		m_execUser( Client&, const vector<string>& );
 			void		m_execPing( Client&, const vector<string>& );
 			void		m_execOper( Client&, const vector<string>& );
+			void		m_execDie( Client&, const vector<string>& );
+
+			// to be added
+			void		m_execKill( Client&, const vector<string>& );
 			void		m_execJoin( Client&, const vector<string>& );
 			void		m_execList( Client&, const vector<string>& );
 			void		m_execInvite( Client&, const vector<string>& );
-
-			void		m_execDie( Client&, const vector<string>& );
 			void		m_execGlobops( Client&, const vector<string>& );
 			void		m_execImportmotd( Client&, const vector<string>& );
 			void		m_execIsbanned( Client&, const vector<string>& );
 			void		m_execIson( Client&, const vector<string>& );
-			void		m_execKill( Client&, const vector<string>& );
 			void		m_execKillban( Client&, const vector<string>& );
 			void		m_execUnban( Client&, const vector<string>& );
 			void		m_execMode( Client&, const vector<string>& );
@@ -88,7 +90,6 @@ namespace irc {
 			void		m_execWho( Client&, const vector<string>& );
 			void		m_execRehash( Client&, const vector<string>& );
 			void		m_execShun( Client&, const vector<string>& );
-
 			void		m_execHelp( Client&, const std::vector<string>& );
 			void		m_execInfo( Client&, const vector<string>& );
 
