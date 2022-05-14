@@ -497,7 +497,7 @@ namespace irc
 			response << ERR_NOTREGISTERED << " * PING :You have not registered";
 		else
 		{
-			response << "PONG :" << arg[1].substr(0, 256);
+			response << "PONG :" << arg[1];
 		}
 		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
@@ -534,4 +534,5 @@ namespace irc
 		else if (!m_isLogged(sender))
 			response << ERR_NOTREGISTERED << " * MODE :You have not registered";
 	}
+
 }

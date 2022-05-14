@@ -58,19 +58,19 @@ namespace irc {
 			void		m_execUser( Client&, const vector<string>& );
 			void		m_execPing( Client&, const vector<string>& );
 			void		m_execOper( Client&, const vector<string>& );
+			void		m_execJoin( Client&, const vector<string>& );
+			void		m_execList( Client&, const vector<string>& );
+			void		m_execInvite( Client&, const vector<string>& );
 
 			void		m_execDie( Client&, const vector<string>& );
 			void		m_execGlobops( Client&, const vector<string>& );
 			void		m_execImportmotd( Client&, const vector<string>& );
-			void		m_execInvite( Client&, const vector<string>& );
 			void		m_execIsbanned( Client&, const vector<string>& );
 			void		m_execIson( Client&, const vector<string>& );
 			void		m_execKill( Client&, const vector<string>& );
 			void		m_execKillban( Client&, const vector<string>& );
 			void		m_execUnban( Client&, const vector<string>& );
-			void		m_execList( Client&, const vector<string>& );
 			void		m_execMode( Client&, const vector<string>& );
-			void		m_execJoin( Client&, const vector<string>& );
 			void		m_execKick( Client&, const vector<string>& );
 			void		m_execSetname( Client&, const vector<string>& );
 			void		m_execPart( Client&, const vector<string>& );
