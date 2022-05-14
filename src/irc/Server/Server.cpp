@@ -559,8 +559,6 @@ namespace irc
 			response << ERR_NEEDMOREPARAMS << " * KILL :Not enough parameters";
 		else if (!sender.hasMode(UMODE_OPERATOR))
 			response << ERR_NOPRIVILEGES << " * KILL :Permission Denied- You're not an IRC operator";
-		else if (!m_findClient(arg[1]))
-			response << ERR_NOSUCHNICK << " * KILL :" << arg[1] << "No such nick/channel";
 		else if (arg[1] == m_name)
 			response << ERR_CANTKILLSERVER << " * KILL :you cant kill a server!"; 
 		else
