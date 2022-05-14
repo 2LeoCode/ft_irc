@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/14 13:46:52 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/14 14:45:36 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -503,12 +503,21 @@ namespace irc
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
+<<<<<<< HEAD
 	void	Server::m_execOper ( Client &sender, const vector<string> &arg )
 	{
+=======
+	void	Server::m_execMode( Client &sender, const vector<string> &arg )
+	{
+		static map< char, int >	userModes = INIT_USERMODES(),
+								channelModes = INIT_CHANNELMODES();
+
+>>>>>>> origin/lsuardi
 		ostringstream	response;
 
 		response << ':' << m_name << ' ';
 		if (arg.size() < 3)
+<<<<<<< HEAD
 			response << ERR_NEEDMOREPARAMS << " * OPER :Not enough parameters";
 		else if (!m_isLogged(sender))
 			response << ERR_NOTREGISTERED << " * OPER :You have not registered";
@@ -521,3 +530,10 @@ namespace irc
 		}
 	}
 }
+=======
+			response << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters";
+		else if (!m_isLogged(sender))
+			response << ERR_NOTREGISTERED << " * MODE :You have not registered";
+	}
+}
+>>>>>>> origin/lsuardi

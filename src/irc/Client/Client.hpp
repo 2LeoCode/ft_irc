@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:55 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/14 13:46:16 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/14 14:45:19 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,19 @@
 #include <netinet/in.h>
 #include "../../irc.hpp"
 
-#define MODE_ADMIN 1
-#define MODE_CLIENTLOG (1 << 1)
-#define MODE_GNOTICELOG (1 << 2)
-#define MODE_HELPER (1 << 3)
-#define MODE_INVISIBLE (1 << 4)
-#define MODE_OPERATOR (1 << 5)
-#define MODE_SERVERLOG (1 << 6)
-#define MODE_WALLOPSLOG (1 << 7)
+#define UMODE_INVISIBLE 1
+#define UMODE_GNOTICELOG (1 << 1)
+#define UMODE_WALLOPSLOG (1 << 2)
+#define UMODE_OPERATOR (1 << 3)
+
+#define INIT_USERMODES( ) ({\
+	map< char, int >	um;\
+	um['i'] = UMODE_INVISIBLE;\
+	um['s'] = UMODE_GNOTICELOG;\
+	um['w'] = UMODE_WALLOPSLOG;\
+	um['o'] = UMODE_OPERATOR;\
+	um;\
+})
 
 extern char g_nickCharset[];
 

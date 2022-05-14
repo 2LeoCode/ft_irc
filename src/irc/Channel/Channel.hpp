@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:58:14 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/13 17:02:01 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/14 14:45:08 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,23 @@
 #include <string>
 #include "../../irc.hpp"
 
-#define MODE_INVITEONLY 1
-#define MODE_KEYPROTECT (1 << 1)
-#define MODE_USERLIMIT (1 << 2)
-#define MODE_MODERATE (1 << 3)
-#define MODE_NOEXTERNAL (1 << 4)
-#define MODE_PRIVATE (1 << 5)
-#define MODE_REGISTERED (1 << 6)
-#define MODE_SECRET (1 << 7)
-#define MODE_TOPICPROT (1 << 8)
+#define CMODE_PRIVATE 1
+#define CMODE_SECRET (1 << 1)
+#define CMODE_INVITEONLY (1 << 2)
+#define CMODE_TOPICPROTECT (1 << 3)
+#define CMODE_NOOUTSIDEMSG (1 << 4)
+#define CMODE_MODERATED (1 << 5)
+
+#define INIT_CHANNELMODES( ) ({\
+	map< char, int >	cm;\
+	cm['p'] = CMODE_PRIVATE;\
+	cm['s'] = CMODE_SECRET;\
+	cm['i'] = CMODE_INVITEONLY;\
+	cm['t'] = CMODE_TOPICPROTECT;\
+	cm['n'] = CMODE_NOOUTSIDEMSG;\
+	cm['m'] = CMODE_MODERATED;\
+	cm;\
+})
 
 namespace irc
 {
