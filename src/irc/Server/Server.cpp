@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/13 17:23:04 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/14 13:46:52 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,7 +228,6 @@ namespace irc
 	{
 		ifstream		in("config/ops.list");
 		string			line, name, pass;
-		char			c;
 
 		if (!in)
 			throw std::runtime_error(string("m_getOps: ") + strerror(errno));
@@ -244,10 +243,7 @@ namespace irc
 			
 			istringstream is(line);
 
-			is >> c;
-			std::getline(is, name, '\'');
-			is >> c;
-			std::getline(is, pass, '\'');
+			is >> name >> pass;
 			try
 			{
 				m_operators.insert(name.data(), pass);
@@ -284,12 +280,12 @@ namespace irc
 			throw ClientDisconnectEvent();
 		}
 
-			// Otherwise we read something, so we append it
-			// to the pending buffer
-		else
+		// Otherwise we read something, so we append it
+		// to the pending buffer
+		else if (m_pending[fd].size() < 500)
 		{
 			buf[ret] = 0;
-			m_pending[fd] += buf;
+			m_pending[fd] += string(buf).substr(0, 500 - m_pending[fd].size());
 		}
 		// Loop until there is nothing to read
 	}
