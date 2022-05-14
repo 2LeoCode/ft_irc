@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:58:14 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/14 14:56:51 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/14 19:31:54 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,14 +58,14 @@ namespace irc
 			void	addClient( Client& );
 			void	delClient( Client& );
 
-			void	opClient( const Client& );
-			void	deopClient( const Client& );
+			void	opNickname( const string& );
+			void	deopNickname( const string& );
 
-			void	banClient( const Client& );
-			void	unbanClient( const Client& );
+			void	banNickname( const string& );
+			void	unbanNickname( const string& );
 
-			void	voiceClient( const Client& );
-			void	unvoiceClient( const Client& );
+			void	voiceNickname( const string& );
+			void	unvoiceNickname( const string& );
 
 			void	setUserLimit( size_t );
 			void	getUserLimit( size_t );
@@ -73,9 +73,9 @@ namespace irc
 		private:
 			int						m_modes;
 			size_t					m_userLimit;
-			set< in6_addr >			m_voiced;
-			set< in6_addr >			m_operators;
-			set< in6_addr >			m_banned;
+			set< string >			m_voiced;
+			set< string >			m_operators;
+			set< string >			m_banned;
 	};
 
 }

@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/14 14:56:55 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/14 19:53:35 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -503,35 +503,158 @@ namespace irc
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
-	void	Server::m_execOper ( Client &sender, const vector<string> &arg )
-	{
-		ostringstream	response;
-
-		response << ':' << m_name << ' ';
-		if (arg.size() < 3)
-			response << ERR_NEEDMOREPARAMS << " * OPER :Not enough parameters";
-		else if (!m_isLogged(sender))
-			response << ERR_NOTREGISTERED << " * OPER :You have not registered";
-		else if (m_operators.at(arg[1].data()) != arg[2])
-			response << ERR_PASSWDMISMATCH << " * OPER :Password incorrect";
-		else
-		{
-			sender.addMode(UMODE_OPERATOR);
-			response << RPL_YOUREOPER << " * OPER :You are now an IRC operator";
-		}
-	}
-
 	void	Server::m_execMode( Client &sender, const vector<string> &arg )
 	{
 		static map< char, int >	userModes = INIT_USERMODES(),
 								channelModes = INIT_CHANNELMODES();
-
-		ostringstream	response;
+		bool					add = true;
+		ostringstream			response;
 
 		response << ':' << m_name << ' ';
 		if (arg.size() < 3)
 			response << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters";
 		else if (!m_isLogged(sender))
 			response << ERR_NOTREGISTERED << " * MODE :You have not registered";
+		else
+		{
+			string::const_iterator	it = arg[2].begin();
+
+			if (*it == '-' || *it == '+')
+				add = (*++it == '+');
+			if (*arg[1].data() == '&' || *arg[1].data() == '#')
+			{
+				// CHANNEL MODES
+				Channel	*chan;
+
+				try
+				{
+					chan = &m_channels.at(arg[1]);
+				}
+				catch (const std::exception& e)
+				{
+					response << ERR_NOSUCHCHANNEL << ' ' << arg[1] << " :No such channel";
+					goto end;
+				}
+				if (!sender.hasMode(UMODE_OPERATOR))
+				{
+					try
+					{
+						chan->users.at(sender.nickname);
+					}
+					catch (...)
+					{
+						response << ERR_NOTONCHANNEL << ' ' << arg[1] << " :You're not on that channel";
+						goto end;
+					}
+				}
+				if (chan->isOperator(sender) || sender.hasMode(UMODE_OPERATOR))
+				{
+					int	nextArg = 3;
+
+					while (it != arg[2].end())
+					{
+						Client	*user;
+
+						if (strchr("olbvk", *it) && arg.size() <= nextArg)
+						{
+							response << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters";
+							++it;
+							continue ;
+						}
+						if (strchr("obv", *it))
+						{
+							try
+							{
+								user = m_findClient(arg[nextArg++]);
+							}
+							catch (...)
+							{
+								response << ERR_NOSUCHNICK << arg[nextArg - 1] << " :No such nick";
+								++it;
+								continue ;
+							}
+						}
+						switch (*it)
+						{
+							case 'o':
+								if (add)
+									chan->opNickname(user->nickname);
+								else
+									chan->deopNickname(user->nickname);
+								break ;
+							case 'l':
+								
+								break ;
+							case 'b':
+
+								break ;
+							case 'v':
+	
+								break ;
+							case 'k':
+	
+								break ;
+							default:
+								try
+								{
+									if (add)
+										chan->addMode(channelModes.at(*it));
+									else
+										chan->delMode(channelModes.at(*it));
+								}
+								catch (...)
+								{
+									response << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me";
+								}
+						}
+						++it;
+					}
+				}
+			}
+			else
+			{
+				// USER MODES
+				Client	*user;
+
+				try
+				{
+					user = &m_findClient(arg[1]);
+				}
+				catch (...)
+				{
+					response << ERR_NOSUCHNICK << ' ' << arg[1] << " :No such nick";
+					goto end;
+				}
+				while (it != arg[2].end())
+				{
+					if (!sender.hasMode(UMODE_OPERATOR))
+					{
+						if (*it == 'o')
+							response << ERR_NOPRIVILEGES << " * MODE :Permission Denied- You're not an IRC operator";
+						else if (arg[1] != sender.username)
+							response << ERR_USERSDONTMATCH << " * MODE :Cant change mode for other users";
+					}
+					else
+					{
+						try
+						{
+							if (add)
+								user->addMode(userModes.at(*it));
+							else
+								user->delMode(userModes.at(*it));
+						}
+						catch (...)
+						{
+							response << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me";
+						}
+					}
+					++it;
+				}
+			}
+		}
+
+		end:
+		response << "\r\n";
+		m_appendToSend(sender.sockfd, response.str());
 	}
 }
