@@ -502,4 +502,19 @@ namespace irc
 		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}
+
+	void	Server::m_execOper ( Client &sender, const vector<string> &arg )
+	{
+		ostringstream	response;
+
+		response << ':' << m_name << ' ';
+		if (arg.size() < 3)
+			response << ERR_NEEDMOREPARAMS << " * OPER :Not enough parameters";
+		else if (!m_isLogged(sender))
+			response << ERR_NOTREGISTERED << " * OPER :You have not registered";
+		else if (m_operators.at(arg[1].data()) != arg[2])
+			response << ERR_PASSWDMISMATCH << " * OPER :Password incorrect";
+		else
+			response << RPL_YOUREOPER << " * OPER :You are now an IRC operator";
+	}
 }
