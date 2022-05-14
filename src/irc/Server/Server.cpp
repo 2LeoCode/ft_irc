@@ -519,6 +519,8 @@ namespace irc
 			sender.addMode(UMODE_OPERATOR);
 			response << RPL_YOUREOPER << " * OPER :You are now an IRC operator";
 		}
+		response << "\r\n";
+		m_appendToSend(sender.sockfd, response.str());
 	}
 
 	void	Server::m_execMode( Client &sender, const vector<string> &arg )
@@ -535,4 +537,16 @@ namespace irc
 			response << ERR_NOTREGISTERED << " * MODE :You have not registered";
 	}
 
+	void	Server::m_execDie( Client &sender, const vector<string> &arg )
+	{
+		ostringstream response;
+
+		response << ':' << m_name << ' ';
+		if (!sender.hasMode(UMODE_OPERATOR))
+			response << ERR_NOPRIVILEGES << " * DIE :You're not channel operator";
+		else
+			throw(ShutdownEvent());
+		response << "\r\n";
+		m_appendToSend(sender.sockfd, response.str());
+	}
 }
