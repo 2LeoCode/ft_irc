@@ -397,6 +397,16 @@ namespace irc
 				it->events = POLLOUT;
 	}
 
+	Client	&Server::m_findClient( const std::string &name )
+	{
+		for (map<int, Client>::iterator it = m_clients.begin(); it != m_clients.end(); ++it)
+		{
+			if (it->second.nickname == name)
+				return (it->second);
+		}
+		throw (std::out_of_range("no such nickname"));
+	}
+
 	void	Server::m_execCap( Client &sender, const vector<string> &arg )
 	{
 		ostringstream	response;
@@ -563,10 +573,14 @@ namespace irc
 			response << ERR_CANTKILLSERVER << " * KILL :you cant kill a server!"; 
 		else
 		{
-			if (int var = m_findClient(arg[1]))
-				m_kickClient(m_clients[var]);
-			else
+			try
+			{
+				m_kickClient(m_findClient(arg[1]));
+			}
+			catch (...)
+			{
 				response << ERR_NOSUCHNICK << " * KILL :" << arg[1] << "No such nick/channel";
+			}
 		}
 		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());

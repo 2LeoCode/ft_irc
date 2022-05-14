@@ -45,7 +45,7 @@ namespace irc {
 			void		m_parsePending( void );
 			void		m_execCommandQueues( void );
 			void		m_kickClient( Client& );
-			int			m_findClient( const std::string &name );
+			Client		&m_findClient( const std::string &name );
 
 			vector< string >	m_parseCommand( const std::string& ); // martin ajout
 			int					m_execCommand( Client&, const vector< string >& ); // martin ajout
