@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 01:01:01 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/13 11:26:10 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/15 17:02:23 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,12 @@
 namespace irc
 {
 
-	Channel::Channel( void )
+	Channel::Channel( const string &name, Client *creator )
+	:	name(name),
+		m_modes( 0 ),
+		m_userLimit( 0 )
 	{
+		m_operators.insert(creator->nickname);
 	}
 
 

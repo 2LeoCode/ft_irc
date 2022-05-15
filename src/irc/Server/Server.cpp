@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/14 19:53:35 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/15 17:02:25 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -553,25 +553,48 @@ namespace irc
 
 					while (it != arg[2].end())
 					{
-						Client	*user;
+						Client			*user;
+						const string	*key;
+						size_t			limit;
 
-						if (strchr("olbvk", *it) && arg.size() <= nextArg)
+						if (strchr("olbvk", *it))
 						{
-							response << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters";
-							++it;
-							continue ;
-						}
-						if (strchr("obv", *it))
-						{
-							try
+							if (arg.size() <= nextArg)
 							{
-								user = m_findClient(arg[nextArg++]);
-							}
-							catch (...)
-							{
-								response << ERR_NOSUCHNICK << arg[nextArg - 1] << " :No such nick";
+								response << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters";
 								++it;
 								continue ;
+							}
+							if (*it == 'k')
+							{
+								if (add)
+									key = &arg[nextArg++];
+							}
+							else if (*it == 'l')
+							{
+								if (add)
+								{
+									istringstream	is(arg[nextArg++]);
+									is >> limit;
+									if (!is.eof() || !limit)
+									{
+										++it;
+										continue ;
+									}
+								}
+							}
+							else
+							{
+								try
+								{
+									user = m_findClient(arg[nextArg++]);
+								}
+								catch (...)
+								{
+									response << ERR_NOSUCHNICK << arg[nextArg - 1] << " :No such nick";
+									++it;
+									continue ;
+								}
 							}
 						}
 						switch (*it)
@@ -583,16 +606,28 @@ namespace irc
 									chan->deopNickname(user->nickname);
 								break ;
 							case 'l':
-								
+								if (add)
+									chan->setUserLimit(limit);
+								else
+									chan->setUserLimit(0);
 								break ;
 							case 'b':
-
+								if (add)
+									chan->banNickname(user->nickname);
+								else
+									chan->unbanNickname(user->nickname);
 								break ;
 							case 'v':
-	
+								if (add)
+									chan->voiceNickname(user->nickname);
+								else
+									chan->unvoiceNickname(user->nickname);
 								break ;
 							case 'k':
-	
+								if (add)
+									chan->password = *key;
+								else
+									chan->password.clear();
 								break ;
 							default:
 								try
