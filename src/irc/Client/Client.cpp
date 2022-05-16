@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:49 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/13 13:09:33 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/16 16:20:14 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,11 @@ namespace irc
 	const sockaddr_in6	&Client::addr( void ) const
 	{
 		return m_addr;
+	}
+
+	bool	operator <(const Client &lhs, const Client &rhs)
+	{
+		return lhs.sockfd < rhs.sockfd;
 	}
 
 }

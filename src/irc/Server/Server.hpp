@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/14 18:16:03 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/16 16:59:17 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,9 +45,11 @@ namespace irc {
 			void		m_parsePending( void );
 			void		m_execCommandQueues( void );
 			void		m_kickClient( Client& );
-			Client		&m_findClient( const std::string &name );
+			Client		&m_findClient( const string& );
+			Client		&m_findClientByHost( const string & );
+			void		m_attributeHost( Client& );
 
-			vector< string >	m_parseCommand( const std::string& ); // martin ajout
+			vector< string >	m_parseCommand( const string& ); // martin ajout
 			int					m_execCommand( Client&, const vector< string >& ); // martin ajout
 
 			void		m_appendToSend( int, const string& );
@@ -116,7 +118,7 @@ namespace irc {
 			typedef void	(Server::*ExecFun)( Client&, const vector<string>& );
 			Trie< ExecFun > 						m_execs;
 
-			map< sockaddr_in6, string >				m_hostnames;
+			map< string, in6_addr >					m_hostnames;
 
 			struct {
 				int		reuseaddr;

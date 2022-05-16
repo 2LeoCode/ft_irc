@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/11 14:26:16 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/05/13 16:59:38 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/16 17:02:03 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,6 +173,10 @@ namespace irc
 	using std::ostringstream;
 	using std::istringstream;
 	using std::ifstream;
+	using std::make_pair;
+	using std::exception;
+	using std::runtime_error;
+	using std::out_of_range;
 	using data::Trie;
 }
 

@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/16 16:00:14 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/16 17:28:50 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,14 @@
 #include <fcntl.h>
 
 #define BUFFER_SIZE 2048
+
+#define MODE_APPLY( true_action, false_action ) \
+do\
+	if (add)\
+		true_action ;\
+	else\
+		false_action ;\
+while (0)
 
 namespace irc
 {
@@ -43,10 +51,10 @@ namespace irc
 	Server	&Server::open( string name, short port, string pass, int protocol, int backlog )
 	{
 		if (m_sockfd)
-			throw std::runtime_error("Server already opened");
+			throw runtime_error("Server already opened");
 
 		if ((m_sockfd = socket(AF_INET6, SOCK_STREAM, protocol)) == -1)
-			throw std::runtime_error(string("socket: ") + strerror(errno));
+			throw runtime_error(string("socket: ") + strerror(errno));
 
 		m_name = name;
 		m_password = pass;
@@ -99,11 +107,11 @@ namespace irc
 		m_opt.reuseaddr = 1;
 
 		if (setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &m_opt.reuseaddr, sizeof(int)))
-			throw std::runtime_error(string("setsockopt: ") + strerror(errno));
+			throw runtime_error(string("setsockopt: ") + strerror(errno));
 
 		const int flags = fcntl(m_sockfd, F_GETFL);
 		if (fcntl(m_sockfd, F_SETFL, flags | O_NONBLOCK))
-			throw std::runtime_error(string("fcntl: ") + strerror(errno));
+			throw runtime_error(string("fcntl: ") + strerror(errno));
 
 		// Fill up the sockaddr struct for the server
 		memset(&m_addr, 0, sizeof(m_addr));
@@ -118,7 +126,7 @@ namespace irc
 		// maximum length to which the queue of pending connections
 		// for sockfd may grow (backlog)
 		|| listen(m_sockfd, backlog))
-			throw std::runtime_error(string("bind/listen: ") + strerror(errno));
+			throw runtime_error(string("bind/listen: ") + strerror(errno));
 
 		// Reserve some space for future clients and
 		// push the socket fd to the pollfd array used in `poll`
@@ -138,7 +146,7 @@ namespace irc
 			ret = poll(m_pollfd.data(), m_pollfd.size(), -1);
 
 			if (ret < 0)
-				throw std::runtime_error(string("poll: ") + strerror(errno));
+				throw runtime_error(string("poll: ") + strerror(errno));
 
 			// Check which fd is rceadable by cheking pollfd::revents 
 			// (if revents == POLLIN the fd is readable)
@@ -165,7 +173,7 @@ namespace irc
 
 					// Store the client data into the server
 					m_clients.insert(
-						std::make_pair(client_fd, Client(client_fd, addr))
+						make_pair(client_fd, Client(client_fd, addr))
 					);
 				}
 			}
@@ -208,7 +216,7 @@ namespace irc
 		ostringstream	s;
 
 		if (!in)
-			throw std::runtime_error(string("m_getMotd: ") + strerror(errno));
+			throw runtime_error(string("m_getMotd: ") + strerror(errno));
 		s << in.rdbuf();
 		m_motd = s.str();
 	}
@@ -219,7 +227,7 @@ namespace irc
 		ostringstream	s;
 
 		if (!in)
-			throw std::runtime_error(string("m_getHelpMsg: ") + strerror(errno));
+			throw runtime_error(string("m_getHelpMsg: ") + strerror(errno));
 		s << in.rdbuf();
 		m_helpmsg = s.str();
 	}
@@ -230,8 +238,8 @@ namespace irc
 		string			line, name, pass;
 
 		if (!in)
-			throw std::runtime_error(string("m_getOps: ") + strerror(errno));
-		while (std::getline(in, line))
+			throw runtime_error(string("m_getOps: ") + strerror(errno));
+		while (getline(in, line))
 		{
 			size_t pos;
 
@@ -270,7 +278,7 @@ namespace irc
 
 			// Otherwise an error occured in recv
 			if (errno != EWOULDBLOCK)
-				throw std::runtime_error(string("recv: ") + strerror(errno));
+				throw runtime_error(string("recv: ") + strerror(errno));
 		}
 
 			// If recv returned 0 it means that the client closed connection
@@ -293,7 +301,7 @@ namespace irc
 	void	Server::m_send( int fd, const string &request )
 	{
 		if (send(fd, request.data(), request.size(), 0) != static_cast<int>(request.size()))
-			throw std::runtime_error(string("send: ") + strerror(errno));
+			throw runtime_error(string("send: ") + strerror(errno));
 	}
 
 	// martin ajout
@@ -321,7 +329,7 @@ namespace irc
 		{
 			(this->*m_execs.at(cmd_name))(sender, command);
 		}
-		catch ( const std::exception &e )
+		catch ( const exception &e )
 		{
 			cerr << e.what() << endl;
 		}
@@ -397,14 +405,24 @@ namespace irc
 				it->events = POLLOUT;
 	}
 
-	Client	&Server::m_findClient( const std::string &name )
+	Client	&Server::m_findClient( const string &name )
 	{
 		for (map<int, Client>::iterator it = m_clients.begin(); it != m_clients.end(); ++it)
 		{
 			if (it->second.nickname == name)
 				return (it->second);
 		}
-		throw (std::out_of_range("no such nickname"));
+		throw (out_of_range("no such nickname"));
+	}
+
+	Client	&Server::m_findClientByHost( const string &hostname )
+	{
+		for (map<int, Client>::iterator it = m_clients.begin(); it != m_clients.end(); ++it)
+		{
+			if (it->second.hostname == hostname)
+				return (it->second);
+		}
+		throw (out_of_range("no such nickname"));
 	}
 
 	void	Server::m_execCap( Client &sender, const vector<string> &arg )
@@ -473,6 +491,24 @@ namespace irc
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
+	void	Server::m_attributeHost( Client &user )
+	{
+		static unsigned	currentHostID = 0;
+
+		for (map< string, in6_addr >::const_iterator it = m_hostnames.begin();
+		it != m_hostnames.end(); ++it)
+		{
+			if (!memcmp(&it->second, &user.addr().sin6_addr, sizeof(in6_addr)))
+			{
+				user.hostname = it->first;
+				return ;
+			}
+		}
+		ostringstream	newHostName("@u");
+		newHostName << currentHostID++;
+		user.hostname = newHostName.str();
+	}
+
 	void	Server::m_execUser( Client &sender, const vector<string> &arg )
 	{
 		ostringstream	response;
@@ -490,6 +526,7 @@ namespace irc
 				sender.realname.erase(sender.realname.begin());
 			for (size_t i = 5; i < arg.size(); ++i)
 				sender.realname += " " + arg[i];
+			m_attributeHost(sender);
 			return ;
 		}
 		response << "\r\n";
@@ -560,18 +597,14 @@ namespace irc
 				{
 					chan = &m_channels.at(arg[1]);
 				}
-				catch (const std::exception& e)
+				catch (const exception& e)
 				{
 					response << ERR_NOSUCHCHANNEL << ' ' << arg[1] << " :No such channel";
 					goto end;
 				}
 				if (!sender.hasMode(UMODE_OPERATOR))
 				{
-					try
-					{
-						chan->users.at(sender.nickname);
-					}
-					catch (...)
+					if (chan->users.find(&sender) == chan->users.end())
 					{
 						response << ERR_NOTONCHANNEL << ' ' << arg[1] << " :You're not on that channel";
 						goto end;
@@ -584,6 +617,7 @@ namespace irc
 					while (it != arg[2].end())
 					{
 						Client			*user;
+						bool			banByHost = false;
 						const string	*key;
 						size_t			limit;
 
@@ -617,7 +651,14 @@ namespace irc
 							{
 								try
 								{
-									user = &m_findClient(arg[nextArg++]);
+									if (*arg[nextArg].data() == '@')
+									{
+										user = &m_findClientByHost(arg[nextArg]);
+										banByHost = true;
+									}
+									else
+										user = &m_findClient(arg[nextArg]);
+									++nextArg;
 								}
 								catch (...)
 								{
@@ -630,42 +671,27 @@ namespace irc
 						switch (*it)
 						{
 							case 'o':
-								if (add)
-									chan->opNickname(user->nickname);
-								else
-									chan->deopNickname(user->nickname);
+								MODE_APPLY(chan->op(*user), chan->deop(*user));
 								break ;
 							case 'l':
-								if (add)
-									chan->setUserLimit(limit);
-								else
-									chan->setUserLimit(0);
+								MODE_APPLY(chan->userLimit = limit, chan->userLimit = 0);
 								break ;
 							case 'b':
-								if (add)
-									chan->banNickname(user->nickname);
+								if (banByHost)
+									MODE_APPLY(chan->banHostname(user->hostname), chan->unbanHostname(user->hostname));
 								else
-									chan->unbanNickname(user->nickname);
+									MODE_APPLY(chan->banNickname(user->nickname), chan->unbanNickname(user->nickname));
 								break ;
 							case 'v':
-								if (add)
-									chan->voiceNickname(user->nickname);
-								else
-									chan->unvoiceNickname(user->nickname);
+								MODE_APPLY(chan->voice(*user), chan->unvoice(*user));
 								break ;
 							case 'k':
-								if (add)
-									chan->password = *key;
-								else
-									chan->password.clear();
+								MODE_APPLY(chan->password = *key, chan->password.clear());
 								break ;
 							default:
 								try
 								{
-									if (add)
-										chan->addMode(channelModes.at(*it));
-									else
-										chan->delMode(channelModes.at(*it));
+									MODE_APPLY(chan->addMode(channelModes.at(*it)), chan->delMode(channelModes.at(*it)));
 								}
 								catch (...)
 								{
@@ -703,10 +729,7 @@ namespace irc
 					{
 						try
 						{
-							if (add)
-								user->addMode(userModes.at(*it));
-							else
-								user->delMode(userModes.at(*it));
+							MODE_APPLY(user->addMode(userModes.at(*it)), user->delMode(userModes.at(*it)));
 						}
 						catch (...)
 						{

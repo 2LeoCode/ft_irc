@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:58:14 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/16 15:54:06 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/16 17:26:59 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,13 @@ namespace irc
 	class Channel
 	{
 		public:
-			Channel( const string&, Client* );
+			Channel( const string&, const Client& );
 			~Channel( void ); // erase channel from all clients
 
 			string					name;
 			string					password;
-			map< string, Client* >	users;
+			size_t					userLimit;
+			set< const Client* >	users;
 
 			void	addMode( int );
 			void	delMode( int );
@@ -55,27 +56,30 @@ namespace irc
 			bool	isVoiced( const Client& ) const;
 			bool	isOperator( const Client& ) const;
 
-			void	addClient( Client& );
-			void	delClient( Client& );
+			void	addClient( const Client& );
+			void	delClient( const Client& );
 
-			void	opNickname( const string& );
-			void	deopNickname( const string& );
+			void	op( const Client& );
+			void	deop( const Client& );
 
 			void	banNickname( const string& );
 			void	unbanNickname( const string& );
 
-			void	voiceNickname( const string& );
-			void	unvoiceNickname( const string& );
+			void	banHostname( const string& );
+			void	unbanHostname( const string& );
 
-			void	setUserLimit( size_t );
-			void	getUserLimit( size_t );
+			void	kick( const Client& );
+
+			void	voice( const Client& );
+			void	unvoice( const Client& );
+
+			EXCEPTION( ClientNotInChannel, "Client is not in channel" );
 
 		private:
 			int						m_modes;
-			size_t					m_userLimit;
-			set< Client* >			m_voiced;
-			set< Client* >			m_operators;
-			set< Client* >			m_banned;
+			set< const Client* >	m_voiced;
+			set< const Client* >	m_operators;
+			set< string >			m_bannedHosts;
 			set< string >			m_bannedNicknames;
 	};
 
