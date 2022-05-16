@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/14 13:54:20 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/14 18:16:03 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ namespace irc {
 													m_password;
 			vector< pollfd >						m_pollfd;
 			map< int, Client >						m_clients;
-			vector< Channel >						m_channels;
+			map< string, Channel >					m_channels;
 
 			map< int, string >						m_pending;
 			map< int, string >						m_tosend;
