@@ -579,15 +579,15 @@ namespace irc
 
 		response << ':' << m_name << ' ';
 		if (arg.size() < 3)
-			response << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters";
+			response << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters\r\n";
 		else if (!m_isLogged(sender))
-			response << ERR_NOTREGISTERED << " * MODE :You have not registered";
+			response << ERR_NOTREGISTERED << " * MODE :You have not registered\r\n";
 		else
 		{
 			string::const_iterator	it = arg[2].begin();
 
 			if (*it == '-' || *it == '+')
-				add = (*++it == '+');
+				add = (*it++ == '+');
 			if (*arg[1].data() == '&' || *arg[1].data() == '#')
 			{
 				// CHANNEL MODES
@@ -599,14 +599,14 @@ namespace irc
 				}
 				catch (const exception& e)
 				{
-					response << ERR_NOSUCHCHANNEL << ' ' << arg[1] << " :No such channel";
+					response << ERR_NOSUCHCHANNEL << ' ' << arg[1] << " :No such channel\r\n";
 					goto end;
 				}
 				if (!sender.hasMode(UMODE_OPERATOR))
 				{
 					if (chan->users.find(&sender) == chan->users.end())
 					{
-						response << ERR_NOTONCHANNEL << ' ' << arg[1] << " :You're not on that channel";
+						response << ERR_NOTONCHANNEL << ' ' << arg[1] << " :You're not on that channel\r\n";
 						goto end;
 					}
 				}
@@ -625,7 +625,7 @@ namespace irc
 						{
 							if (arg.size() <= nextArg)
 							{
-								response << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters";
+								response << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters\r\n";
 								++it;
 								continue ;
 							}
@@ -647,22 +647,28 @@ namespace irc
 									}
 								}
 							}
+							else if (*arg[nextArg].data() == '@')
+							{
+								try
+								{
+									user = &m_findClientByHost(arg[nextArg++]);
+								}
+								catch (...)
+								{
+									++it;
+									continue ;
+								}
+								banByHost = true;
+							}
 							else
 							{
 								try
 								{
-									if (*arg[nextArg].data() == '@')
-									{
-										user = &m_findClientByHost(arg[nextArg]);
-										banByHost = true;
-									}
-									else
-										user = &m_findClient(arg[nextArg]);
-									++nextArg;
+									user = &m_findClient(arg[nextArg++]);
 								}
 								catch (...)
 								{
-									response << ERR_NOSUCHNICK << arg[nextArg - 1] << " :No such nick";
+									response << ERR_NOSUCHNICK << arg[nextArg - 1] << " :No such nick\r\n";
 									++it;
 									continue ;
 								}
@@ -695,7 +701,7 @@ namespace irc
 								}
 								catch (...)
 								{
-									response << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me";
+									response << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me\r\n";
 								}
 						}
 						++it;
@@ -713,7 +719,7 @@ namespace irc
 				}
 				catch (...)
 				{
-					response << ERR_NOSUCHNICK << ' ' << arg[1] << " :No such nick";
+					response << ERR_NOSUCHNICK << ' ' << arg[1] << " :No such nick\r\n";
 					goto end;
 				}
 				while (it != arg[2].end())
@@ -721,9 +727,9 @@ namespace irc
 					if (!sender.hasMode(UMODE_OPERATOR))
 					{
 						if (*it == 'o')
-							response << ERR_NOPRIVILEGES << " * MODE :Permission Denied- You're not an IRC operator";
+							response << ERR_NOPRIVILEGES << " * MODE :Permission Denied- You're not an IRC operator\r\n";
 						else if (arg[1] != sender.username)
-							response << ERR_USERSDONTMATCH << " * MODE :Cant change mode for other users";
+							response << ERR_USERSDONTMATCH << " * MODE :Cant change mode for other users\r\n";
 					}
 					else
 					{
@@ -733,7 +739,7 @@ namespace irc
 						}
 						catch (...)
 						{
-							response << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me";
+							response << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me\r\n";
 						}
 					}
 					++it;
@@ -742,7 +748,6 @@ namespace irc
 		}
 
 		end:
-		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
