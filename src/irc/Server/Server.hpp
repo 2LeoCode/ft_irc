@@ -63,9 +63,10 @@ namespace irc {
 			void		m_execOper( Client&, const vector<string>& );
 			void		m_execDie( Client&, const vector<string>& );
 			void		m_execKill( Client&, const vector<string>& );
+			void		m_execJoin( Client&, const vector<string>& );
+			void		m_execPrivmsg( Client&, const vector<string>& );
 
 			// to be added
-			void		m_execJoin( Client&, const vector<string>& );
 			void		m_execList( Client&, const vector<string>& );
 			void		m_execInvite( Client&, const vector<string>& );
 			void		m_execGlobops( Client&, const vector<string>& );
@@ -80,7 +81,6 @@ namespace irc {
 			void		m_execPart( Client&, const vector<string>& );
 			void		m_execQuit( Client&, const vector<string>& );
 			void		m_execMe( Client&, const vector<string>& );
-			void		m_execPrivmsg( Client&, const vector<string>& );
 			void		m_execNotice( Client&, const vector<string>& );
 			void		m_execNames( Client&, const vector<string>& );
 			void		m_execTime( Client&, const vector<string>& );

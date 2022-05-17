@@ -789,4 +789,67 @@ namespace irc
 		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}
+
+	void	Server::m_execPrivmsg(Client &sender, const vector<string> &arg)
+	{
+		vector< Client* > privTargets, chanTargets;
+
+		if (!m_islogged(sender))
+		{
+			response << " * PRIVMSG :You have not registered";
+		}
+		else if (arg.size() == 1)
+		{
+			response << ERR_NORECIPIENT << " * PRIVMSG :No recipient given (PRIVMSG)";
+		}
+		else if (arg.size() == 2)
+		{
+			if (arg[1][0] == ':')
+			{
+				response << ERR_NORECIPIENT << " * PRIVMSG :No recipient given (PRIVMSG)";
+			}
+			else
+			{
+				response << ERR_NOTEXTTOSEND << " * PRIVMSG :No text to send (PRIVMSG)";
+			}
+		}
+		else if (arg[2][0] != ':')
+		{
+			response << ERR_NOTEXTTOSEND << " * PRIVMSG :No text to send (PRIVMSG)";
+		}
+		else
+		{
+			typedef typename vector<string>::iterator iter;
+			vector<string> receivers = split(arg[1], ',');
+			for (iter it = receivers.begin(); it != reveivers.end(); it++)
+			{
+				if (*it[0] == '#' || *it[0] == '&')
+				{
+					//push every client of channel to chanTargets
+					try
+					{
+						typedef typename set<Client>::iterator chanIter;
+						Channel *ptr = &m_channels.at(*it);
+						for (chanIter chanIt = ptr.begin(); chanIt != ptr.end(); chanIt++)
+						{
+							
+						}
+					}
+					catch (...)
+					{
+						response << ERR_NOSUCHNICK << *it << " :No such nick/channel";
+					}
+				
+				}
+				else
+				{
+					//push client to privTargets
+				}
+			}
+			loop through target
+			
+		}
+		response << "\r\n";
+		m_appendToSend(sender.sockfd, response.str());
+	}
 }
