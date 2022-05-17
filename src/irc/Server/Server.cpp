@@ -828,11 +828,11 @@ namespace irc
 					//push every client of channel to chanTargets
 					try
 					{
-						typedef typename set<Client>::iterator chanIter;
+						typedef typename set<Client*>::iterator chanIter;
 						Channel *ptr = &m_channels.at(*it);
 						for (chanIter chanIt = ptr.begin(); chanIt != ptr.end(); chanIt++)
 						{
-							
+							chanTargets.pushback(*chanIt);
 						}
 					}
 					catch (...)
