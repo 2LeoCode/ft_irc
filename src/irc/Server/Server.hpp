@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/16 16:59:17 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/17 15:51:34 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,9 +63,9 @@ namespace irc {
 			void		m_execOper( Client&, const vector<string>& );
 			void		m_execDie( Client&, const vector<string>& );
 			void		m_execKill( Client&, const vector<string>& );
+			void		m_execJoin( Client&, const vector<string>& );
 
 			// to be added
-			void		m_execJoin( Client&, const vector<string>& );
 			void		m_execList( Client&, const vector<string>& );
 			void		m_execInvite( Client&, const vector<string>& );
 			void		m_execGlobops( Client&, const vector<string>& );

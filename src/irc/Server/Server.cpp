@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/16 17:28:50 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/17 16:19:08 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -756,10 +756,12 @@ namespace irc
 		ostringstream response;
 
 		response << ':' << m_name << ' ';
-		if (!sender.hasMode(UMODE_OPERATOR))
+		if (!m_isLogged(sender))
+			response << ERR_NOTREGISTERED << " * DIE :You have not registered";
+		else if (!sender.hasMode(UMODE_OPERATOR))
 			response << ERR_NOPRIVILEGES << " * :Permission Denied- You're not an IRC operator";
 		else
-			throw(ShutdownEvent());
+			throw (ShutdownEvent());
 		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}
@@ -771,6 +773,8 @@ namespace irc
 		response << ':' << m_name << ' ';
 		if (arg.size() < 2)
 			response << ERR_NEEDMOREPARAMS << " * KILL :Not enough parameters";
+		else if (!m_isLogged(sender))
+			response << ERR_NOTREGISTERED << " * KILL :You have not registered";
 		else if (!sender.hasMode(UMODE_OPERATOR))
 			response << ERR_NOPRIVILEGES << " * KILL :Permission Denied- You're not an IRC operator";
 		else if (arg[1] == m_name)
@@ -788,5 +792,34 @@ namespace irc
 		}
 		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
+	}
+
+	void		m_execJoin( Client &sender, const vector<string> &arg )
+	{
+		typedef typename vector<string>::const_iterator Iter;
+		vector< string >	chanNames;
+		vector< Channel* >	chans;
+		ostringstream 		response;
+
+		if (arg.size() < 2)
+			response << ERR_NEEDMOREPARAMS << " * JOIN :Not enough parameters\r\n";
+		else if (!m_isLogged(sender))
+			response << ERR_NOTREGISTERED << " * JOIN :You have not registered\r\n";
+		else
+		{
+			chanNames = split(arg[1], ',');
+			for (Iter it = chanNames.begin(); it != chanNames.end(); ++it)
+			{
+				try
+				{
+					chans.push_back(&m_channels.at(*it));
+				}
+				catch (...)
+				{
+					response << ERR_NOSUCHCHANNEL << ' ' << *it << " :No such channel\r\n";
+				}
+			}
+			// join channels
+		}
 	}
 }
