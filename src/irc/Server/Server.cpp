@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/17 16:19:08 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/20 01:08:21 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,6 +261,16 @@ namespace irc
 		}
 	}
 
+	const string	Server::m_prefix( void ) const
+	{
+		return ':' + m_name + ' ';
+	}
+
+	const string	Server::m_endl( void ) const
+	{
+		return m_endl();
+	}
+
 	void	Server::m_recv( int fd )
 	{
 		static char	buf[BUFFER_SIZE + 1] = { 0 };
@@ -425,20 +435,31 @@ namespace irc
 		throw (out_of_range("no such nickname"));
 	}
 
+	const vector< string >	Server::m_make_args( int ac, ... ) const
+	{
+		va_list				ap;
+		vector< string >	av;
+
+		av.reserve(ac);
+		va_start(ap, ac);
+		while (ac--)
+			av.push_back(va_arg(ap, char*));
+		va_end(ap);
+		return av;
+	}
+
 	void	Server::m_execCap( Client &sender, const vector<string> &arg )
 	{
 		ostringstream	response;
 
-		response << ':' << m_name << ' ';
 		if (arg.size() < 2)
-			response << ERR_NEEDMOREPARAMS << " * CAP :Not enough parameters";
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * CAP :Not enough parameters" << m_endl();
 		else if (arg[1] == "LS")
-			response << "CAP * LS :";
+			response << m_prefix() << "CAP * LS :" << m_endl();
 		else if (arg[1] == "END")
 			return ;
 		else
-			response << ERR_INVALIDCAPCMD << " * " << arg[1] << " :Invalid CAP sub-command";
-		response << "\r\n";
+			response << m_prefix() << ERR_INVALIDCAPCMD << " * " << arg[1] << " :Invalid CAP sub-command" << m_endl();
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
@@ -446,17 +467,15 @@ namespace irc
 	{
 		ostringstream	response;
 
-		response << ':' << m_name << ' ';
 		if (m_isLogged(sender))
-			response << ERR_ALREADYREGISTRED << " * PASS :You may not reregister";
+			response << m_prefix() << ERR_ALREADYREGISTRED << " * PASS :You may not reregister" << m_endl();
 		else if (arg.size() < 2)
-			response << ERR_NEEDMOREPARAMS << " * PASS :Not enough parameters";
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * PASS :Not enough parameters" << m_endl();
 		else
 		{
 			sender.lastpass = arg[1];
 			return ;
 		}
-		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
@@ -464,11 +483,10 @@ namespace irc
 	{
 		ostringstream	response;
 
-		response << ':' << m_name << ' ';
 		if (arg.size() < 2)
-			response << ERR_NONICKNAMEGIVEN << " * NICK :No nickname given";
+			response << m_prefix() << ERR_NONICKNAMEGIVEN << " * NICK :No nickname given" << m_endl();
 		else if (arg[1].length() > 9 || arg[1].find_first_not_of(g_nickCharset) != string::npos)
-			response << ERR_ERRONEUSNICKNAME << " * " << arg[1] << " :Erroneus nickname";
+			response << m_prefix() << ERR_ERRONEUSNICKNAME << " * " << arg[1] << " :Erroneus nickname" << m_endl();
 		else
 		{
 			map<int, Client>::const_iterator it = m_clients.begin();
@@ -476,7 +494,7 @@ namespace irc
 			{
 				if (it->second.sockfd != sender.sockfd && it->second.nickname == arg[1])
 				{
-					response << ERR_NICKNAMEINUSE << " * " << arg[1] << " :Nickname is already in use";
+					response << m_prefix() << ERR_NICKNAMEINUSE << " * " << arg[1] << " :Nickname is already in use";
 					break ;
 				}
 				++it;
@@ -487,7 +505,6 @@ namespace irc
 				return ;
 			}
 		}
-		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
@@ -513,11 +530,10 @@ namespace irc
 	{
 		ostringstream	response;
 
-		response << ':' << m_name << ' ';
 		if (m_isLogged(sender))
-			response << ERR_ALREADYREGISTRED << " * USER :You may not reregister";
+			response << m_prefix() << ERR_ALREADYREGISTRED << " * USER :You may not reregister" << m_endl();
 		else if (arg.size() < 5)
-			response << ERR_NEEDMOREPARAMS << " * USER :Not enough parameters";
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * USER :Not enough parameters" << m_endl();
 		else
 		{
 			sender.username = arg[1];
@@ -529,7 +545,6 @@ namespace irc
 			m_attributeHost(sender);
 			return ;
 		}
-		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
@@ -537,16 +552,12 @@ namespace irc
 	{
 		ostringstream	response;
 
-		response << ':' << m_name << ' ';
 		if (arg.size() < 2)
-			response << ERR_NEEDMOREPARAMS << " * PING :Not enough parameters";
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * PING :Not enough parameters" << m_endl();
 		else if (!m_isLogged(sender))
-			response << ERR_NOTREGISTERED << " * PING :You have not registered";
+			response << m_prefix() << ERR_NOTREGISTERED << " * PING :You have not registered" << m_endl();
 		else
-		{
-			response << "PONG :" << arg[1];
-		}
-		response << "\r\n";
+			response << m_prefix() << "PONG :" << arg[1] << m_endl();
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
@@ -554,19 +565,17 @@ namespace irc
 	{
 		ostringstream	response;
 
-		response << ':' << m_name << ' ';
 		if (arg.size() < 3)
-			response << ERR_NEEDMOREPARAMS << " * OPER :Not enough parameters";
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * OPER :Not enough parameters" << m_endl();
 		else if (!m_isLogged(sender))
-			response << ERR_NOTREGISTERED << " * OPER :You have not registered";
+			response << m_prefix() << ERR_NOTREGISTERED << " * OPER :You have not registered" << m_endl();
 		else if (m_operators.at(arg[1].data()) != arg[2])
-			response << ERR_PASSWDMISMATCH << " * OPER :Password incorrect";
+			response << m_prefix() << ERR_PASSWDMISMATCH << " * OPER :Password incorrect" << m_endl();
 		else
 		{
 			sender.addMode(UMODE_OPERATOR);
-			response << RPL_YOUREOPER << " * OPER :You are now an IRC operator";
+			response << m_prefix() << RPL_YOUREOPER << " * OPER :You are now an IRC operator" << m_endl();
 		}
-		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
@@ -577,11 +586,10 @@ namespace irc
 		bool					add = true;
 		ostringstream			response;
 
-		response << ':' << m_name << ' ';
 		if (arg.size() < 3)
-			response << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters\r\n";
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters" << m_endl();
 		else if (!m_isLogged(sender))
-			response << ERR_NOTREGISTERED << " * MODE :You have not registered\r\n";
+			response << m_prefix() << ERR_NOTREGISTERED << " * MODE :You have not registered" << m_endl();
 		else
 		{
 			string::const_iterator	it = arg[2].begin();
@@ -599,15 +607,15 @@ namespace irc
 				}
 				catch (const exception& e)
 				{
-					response << ERR_NOSUCHCHANNEL << ' ' << arg[1] << " :No such channel\r\n";
-					goto end;
+					response << m_prefix() << ERR_NOSUCHCHANNEL << ' ' << arg[1] << " :No such channel" << m_endl();
+					goto END;
 				}
 				if (!sender.hasMode(UMODE_OPERATOR))
 				{
 					if (chan->users.find(&sender) == chan->users.end())
 					{
-						response << ERR_NOTONCHANNEL << ' ' << arg[1] << " :You're not on that channel\r\n";
-						goto end;
+						response << m_prefix() << ERR_NOTONCHANNEL << ' ' << arg[1] << " :You're not on that channel" << m_endl();
+						goto END;
 					}
 				}
 				if (chan->isOperator(sender) || sender.hasMode(UMODE_OPERATOR))
@@ -625,7 +633,7 @@ namespace irc
 						{
 							if (arg.size() <= nextArg)
 							{
-								response << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters\r\n";
+								response << m_prefix() << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters" << m_endl();
 								++it;
 								continue ;
 							}
@@ -668,7 +676,7 @@ namespace irc
 								}
 								catch (...)
 								{
-									response << ERR_NOSUCHNICK << arg[nextArg - 1] << " :No such nick\r\n";
+									response << m_prefix() << ERR_NOSUCHNICK << arg[nextArg - 1] << " :No such nick" << m_endl();
 									++it;
 									continue ;
 								}
@@ -701,7 +709,7 @@ namespace irc
 								}
 								catch (...)
 								{
-									response << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me\r\n";
+									response << m_prefix() << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me" << m_endl();
 								}
 						}
 						++it;
@@ -719,17 +727,17 @@ namespace irc
 				}
 				catch (...)
 				{
-					response << ERR_NOSUCHNICK << ' ' << arg[1] << " :No such nick\r\n";
-					goto end;
+					response << m_prefix() << ERR_NOSUCHNICK << ' ' << arg[1] << " :No such nick" << m_endl();
+					goto END;
 				}
 				while (it != arg[2].end())
 				{
 					if (!sender.hasMode(UMODE_OPERATOR))
 					{
 						if (*it == 'o')
-							response << ERR_NOPRIVILEGES << " * MODE :Permission Denied- You're not an IRC operator\r\n";
+							response << m_prefix() << ERR_NOPRIVILEGES << " * MODE :Permission Denied- You're not an IRC operator" << m_endl();
 						else if (arg[1] != sender.username)
-							response << ERR_USERSDONTMATCH << " * MODE :Cant change mode for other users\r\n";
+							response << m_prefix() << ERR_USERSDONTMATCH << " * MODE :Cant change mode for other users" << m_endl();
 					}
 					else
 					{
@@ -739,7 +747,7 @@ namespace irc
 						}
 						catch (...)
 						{
-							response << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me\r\n";
+							response << m_prefix() << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me" << m_endl();
 						}
 					}
 					++it;
@@ -747,7 +755,7 @@ namespace irc
 			}
 		}
 
-		end:
+		END:
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
@@ -757,12 +765,11 @@ namespace irc
 
 		response << ':' << m_name << ' ';
 		if (!m_isLogged(sender))
-			response << ERR_NOTREGISTERED << " * DIE :You have not registered";
+			response << m_prefix() << ERR_NOTREGISTERED << " * DIE :You have not registeredr" << m_endl();
 		else if (!sender.hasMode(UMODE_OPERATOR))
-			response << ERR_NOPRIVILEGES << " * :Permission Denied- You're not an IRC operator";
+			response << m_prefix() << ERR_NOPRIVILEGES << " * :Permission Denied- You're not an IRC operator" << m_endl();
 		else
 			throw (ShutdownEvent());
-		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
@@ -770,15 +777,14 @@ namespace irc
 	{
 		ostringstream response;
 
-		response << ':' << m_name << ' ';
 		if (arg.size() < 2)
-			response << ERR_NEEDMOREPARAMS << " * KILL :Not enough parameters";
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * KILL :Not enough parameters" << m_endl();
 		else if (!m_isLogged(sender))
-			response << ERR_NOTREGISTERED << " * KILL :You have not registered";
+			response << m_prefix() << ERR_NOTREGISTERED << " * KILL :You have not registered" << m_endl();
 		else if (!sender.hasMode(UMODE_OPERATOR))
-			response << ERR_NOPRIVILEGES << " * KILL :Permission Denied- You're not an IRC operator";
+			response << m_prefix() << ERR_NOPRIVILEGES << " * KILL :Permission Denied- You're not an IRC operator" << m_endl();
 		else if (arg[1] == m_name)
-			response << ERR_CANTKILLSERVER << " * KILL :you cant kill a server!"; 
+			response << m_prefix() << ERR_CANTKILLSERVER << " * KILL :you cant kill a server!" << m_endl(); 
 		else
 		{
 			try
@@ -787,39 +793,131 @@ namespace irc
 			}
 			catch (...)
 			{
-				response << ERR_NOSUCHNICK << " * KILL :" << arg[1] << "No such nick/channel";
+				response << m_prefix() << ERR_NOSUCHNICK << " * KILL :" << arg[1] << "No such nick/channel" << m_endl();
 			}
 		}
-		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
-	void		m_execJoin( Client &sender, const vector<string> &arg )
+	void		Server::m_execJoin( Client &sender, const vector<string> &arg )
 	{
 		typedef typename vector<string>::const_iterator Iter;
-		vector< string >	chanNames;
-		vector< Channel* >	chans;
-		ostringstream 		response;
+		vector< string >					chanNames;
+		queue< string, vector< string > >	keys;
+		queue< Channel* >					chansToJoin;
+		ostringstream 						response;
 
 		if (arg.size() < 2)
-			response << ERR_NEEDMOREPARAMS << " * JOIN :Not enough parameters\r\n";
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * JOIN :Not enough parameters" << m_endl();
 		else if (!m_isLogged(sender))
-			response << ERR_NOTREGISTERED << " * JOIN :You have not registered\r\n";
+			response << m_prefix() << ERR_NOTREGISTERED << " * JOIN :You have not registered" << m_endl();
 		else
 		{
 			chanNames = split(arg[1], ',');
+			if (arg.size() > 2)
+				keys = queue<string, vector<string>>(split(arg[2], ','));
 			for (Iter it = chanNames.begin(); it != chanNames.end(); ++it)
 			{
 				try
 				{
-					chans.push_back(&m_channels.at(*it));
+					chansToJoin.push(&m_channels.at(*it));
 				}
 				catch (...)
 				{
-					response << ERR_NOSUCHCHANNEL << ' ' << *it << " :No such channel\r\n";
+					if (*it->data() == '&' && !sender.hasMode(UMODE_OPERATOR))
+						response << m_prefix() << ERR_NOSUCHCHANNEL << ' ' << *it << " :No such channel" << m_endl();
+					else
+					{
+						m_channels.insert(make_pair(*it, Channel(*it)));
+						chansToJoin.push(&m_channels.at(*it));
+					}
+				}
+				while (!chansToJoin.empty())
+				{
+					Channel				*cur = chansToJoin.front();
+					chansToJoin.pop();
+
+					if (sender.channelCount() == MAX_CHANNELS)
+					{
+						response << ERR_TOOMANYCHANNELS << cur->name << " :You have joined to many channels" << m_endl();
+						continue ;
+					}
+					if (cur->hasMode(CMODE_INVITEONLY) && !sender.isInvited(*cur))
+					{
+						response << m_prefix() << ERR_INVITEONLYCHAN << cur->name << " :Cannot join channel (+i)" << m_endl();
+						continue ;
+					}
+					if (cur->isBanned(sender))
+					{
+						response << m_prefix() << ERR_BANNEDFROMCHAN << cur->name << " :Cannot join channel (+b)" << m_endl();
+						continue ;
+					}
+					if (!cur->password.empty())
+					{
+						string	key;
+
+						if (keys.empty())
+							goto BAD_KEY;
+						key = keys.front();
+						keys.pop();
+						if (key != cur->password)
+						{
+							BAD_KEY:
+							response << m_prefix() << ERR_BADCHANNELKEY << cur->name << " :Cannot join channel (+k)" << m_endl();
+							continue ;
+						}
+					}
+					if (cur->userLimit != 0 && cur->users.size() == cur->userLimit)
+					{
+						response << m_prefix() << ERR_CHANNELISFULL << cur->name << " :Cannot join channel (+l)" << m_endl();
+						continue ;
+					}
+					sender.joinChannel(*cur);
+					if (cur->users.size() == 1)
+						cur->op(sender);
+					response << m_prefix() << "JOIN :" << cur->name << m_endl();
+					response << m_prefix() << RPL_TOPIC << cur->name << " :" << cur->topic << m_endl();
+					m_execNames(sender, m_make_args(2, "NAMES", cur->name.data()));
 				}
 			}
-			// join channels
+		}
+		m_appendToSend(sender.sockfd, response.str());
+	}
+
+	void	Server::m_execNames( Client &sender, const vector< string > &arg )
+	{
+		typedef typename set< const Client* >::const_iterator	Iter;
+		ostringstream						response;
+		queue< string, vector< string > >	channels;
+
+		if (arg.size() < 2)
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * NAMES :Not enough parameters" << m_endl();
+		else if (!m_isLogged(sender))
+			response << m_prefix() << ERR_NOTREGISTERED << " * NAMES :You have not registered" << m_endl();
+		else
+		{
+			channels = queue< string, vector< string > >(split(arg[1], ','));
+			while (!channels.empty())
+			{
+				const Channel	*c;
+				string	cname = channels.front();
+				channels.pop();
+				try
+				{
+					c = &m_channels.at(cname);
+				}
+				catch (...)
+				{ continue ; }
+				response << m_prefix() << RPL_NAMREPLY << sender.nickname << " = " << cname << " :";
+				for (Iter it = c->users.begin(); it != c->users.end() && response << ' '; ++it)
+				{
+					if (c->isOperator(**it))
+						response << '@';
+					response << (*it)->nickname;
+				}
+				response << m_endl() << m_prefix << RPL_ENDOFNAMES << cname << " :End of /NAMES list" << m_endl;
+			}
 		}
 	}
+
 }

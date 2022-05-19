@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/13 11:27:09 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/05/17 14:53:21 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/19 23:31:04 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,5 @@ std::ostream	&operator <<( std::ostream &out, const std::vector< T > &v )
 		out << '[' << *it << ']' << std::endl;
 	return out;
 }
-
 
 std::vector< std::string >	split( std::string s, char c );
