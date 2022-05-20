@@ -792,9 +792,10 @@ namespace irc
 
 	void	Server::m_execPrivmsg(Client &sender, const vector<string> &arg)
 	{
-		vector< Client* > privTargets, chanTargets;
+		ostringstream response;
+		vector< const Client* > privTargets, chanTargets;
 
-		if (!m_islogged(sender))
+		if (!m_isLogged(sender))
 		{
 			response << " * PRIVMSG :You have not registered";
 		}
@@ -821,18 +822,18 @@ namespace irc
 		{
 			typedef typename vector<string>::iterator iter;
 			vector<string> receivers = split(arg[1], ',');
-			for (iter it = receivers.begin(); it != reveivers.end(); it++)
+			for (iter it = receivers.begin(); it != receivers.end(); it++)
 			{
-				if (*it[0] == '#' || *it[0] == '&')
+				if ((*it)[0] == '#' || (*it)[0] == '&')
 				{
 					//push every client of channel to chanTargets
 					try
 					{
-						typedef typename set<Client*>::iterator chanIter;
+						typedef typename set<const irc::Client*>::iterator chanIter;
 						Channel *ptr = &m_channels.at(*it);
-						for (chanIter chanIt = ptr.begin(); chanIt != ptr.end(); chanIt++)
+						for (chanIter chanIt = ptr->users.begin(); chanIt != ptr->users.end(); chanIt++)
 						{
-							chanTargets.pushback(*chanIt);
+							chanTargets.push_back(*chanIt);
 						}
 					}
 					catch (...)
