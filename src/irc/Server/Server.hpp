@@ -64,11 +64,8 @@ namespace irc {
 			void		m_execDie( Client&, const vector<string>& );
 			void		m_execKill( Client&, const vector<string>& );
 			void		m_execJoin( Client&, const vector<string>& );
-<<<<<<< HEAD
 			void		m_execPrivmsg( Client&, const vector<string>& );
-=======
 			void		m_execNames( Client&, const vector<string>& );
->>>>>>> master
 
 			// to be added
 			void		m_execList( Client&, const vector<string>& );
