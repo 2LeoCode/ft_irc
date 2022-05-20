@@ -884,10 +884,12 @@ namespace irc
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
+	// Reste a coder l'envoi du message et a checker la validite des clients avant de les push sur les vecteurs de targets.
 	void	Server::m_execPrivmsg(Client &sender, const vector<string> &arg)
 	{
 		ostringstream response;
 		vector< const Client* > privTargets, chanTargets;
+		
 
 		if (!m_isLogged(sender))
 		{
@@ -923,26 +925,35 @@ namespace irc
 					//push every client of channel to chanTargets
 					try
 					{
-						typedef typename set<const irc::Client*>::iterator chanIter;
+						typedef typename set<const irc::Client*>::iterator cliIter;
 						Channel *ptr = &m_channels.at(*it);
-						for (chanIter chanIt = ptr->users.begin(); chanIt != ptr->users.end(); chanIt++)
+						for (cliIter cliIt = ptr->users.begin(); cliIt != ptr->users.end(); cliIt++)
 						{
-							chanTargets.push_back(*chanIt);
+							chanTargets.push_back(*cliIt);
 						}
 					}
 					catch (...)
 					{
 						response << ERR_NOSUCHNICK << *it << " :No such nick/channel";
 					}
-				
 				}
 				else
 				{
+					privTargets.push_back(&m_findClient(*it));
 					//push client to privTargets
 				}
 			}
 			//loop through target
-			
+			typedef typename vector<const irc::Client*>::iterator privIter;
+			for (privIter privIt = privTargets.begin(); privIt != privTargets.end(); privIt++)
+			{
+				// send message
+			}
+			typedef typename vector<const irc::Client*>::iterator chanIter;
+			for (chanIter chanIt = chanTargets.begin(); chanIt != chanTargets.end(); chanIt++)
+			{
+				// send message
+			}
 		}
 		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
