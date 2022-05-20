@@ -929,6 +929,7 @@ namespace irc
 						Channel *ptr = &m_channels.at(*it);
 						for (cliIter cliIt = ptr->users.begin(); cliIt != ptr->users.end(); cliIt++)
 						{
+							// ===> /!\/!\ NEED TO ADD A CHECK BEFORE PUSHING /!\/!\ <===
 							chanTargets.push_back(*cliIt);
 						}
 					}
@@ -939,6 +940,7 @@ namespace irc
 				}
 				else
 				{
+					// ===> /!\/!\ NEED TO ADD A CHECK BEFORE PUSHING /!\/!\ <===
 					privTargets.push_back(&m_findClient(*it));
 					//push client to privTargets
 				}
