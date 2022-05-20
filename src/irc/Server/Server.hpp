@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/16 16:59:17 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/20 01:05:42 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,11 @@ namespace irc {
 			void		m_execDie( Client&, const vector<string>& );
 			void		m_execKill( Client&, const vector<string>& );
 			void		m_execJoin( Client&, const vector<string>& );
+<<<<<<< HEAD
 			void		m_execPrivmsg( Client&, const vector<string>& );
+=======
+			void		m_execNames( Client&, const vector<string>& );
+>>>>>>> master
 
 			// to be added
 			void		m_execList( Client&, const vector<string>& );
@@ -82,7 +86,6 @@ namespace irc {
 			void		m_execQuit( Client&, const vector<string>& );
 			void		m_execMe( Client&, const vector<string>& );
 			void		m_execNotice( Client&, const vector<string>& );
-			void		m_execNames( Client&, const vector<string>& );
 			void		m_execTime( Client&, const vector<string>& );
 			void		m_execTopic( Client&, const vector<string>& );
 			void		m_execUserhost( Client&, const vector<string>& );
@@ -95,6 +98,9 @@ namespace irc {
 			void		m_execHelp( Client&, const std::vector<string>& );
 			void		m_execInfo( Client&, const vector<string>& );
 
+			const string			m_prefix( void ) const;
+			const string			m_endl( void ) const;
+			const vector< string >	m_make_args( int, ... ) const;
 			int										m_sockfd;
 			sockaddr_in6							m_addr;
 			string									m_name,
@@ -112,8 +118,6 @@ namespace irc {
 			Trie< string >							m_operators;
 			set< string >							m_banned;
 			set< string	>							m_muted;
-			//vector< string >						m_command; // martin ajout ( gere par une variable non-membre )
-			//int									m_commandId; // martin ajout ( gere par une variable non-membre )
 
 			typedef void	(Server::*ExecFun)( Client&, const vector<string>& );
 			Trie< ExecFun > 						m_execs;

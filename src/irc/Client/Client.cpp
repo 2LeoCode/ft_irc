@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:49 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/16 16:20:14 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/20 00:20:13 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,29 @@ namespace irc
 		return m_addr;
 	}
 
-	bool	operator <(const Client &lhs, const Client &rhs)
+	bool	Client::isInvited( const Channel &c ) const 
+	{
+		return m_invites.find(&c) != m_invites.end();
+	}
+
+	bool	Client::channelCount( void ) const
+	{
+		return m_curChans.size();
+	}
+
+	void	Client::joinChannel( Channel &c )
+	{
+		m_curChans.insert(&c);
+		c.addClient(*this);
+	}
+
+	void	Client::partChannel( Channel &c )
+	{
+		m_curChans.erase(&c);
+		c.delClient(*this);
+	}
+
+	bool	operator <( const Client &lhs, const Client &rhs )
 	{
 		return lhs.sockfd < rhs.sockfd;
 	}

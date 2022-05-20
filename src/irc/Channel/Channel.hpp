@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:58:14 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/16 17:26:59 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/19 18:37:17 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,10 +40,12 @@ namespace irc
 	class Channel
 	{
 		public:
-			Channel( const string&, const Client& );
+			Channel( const string& );
+			Channel( const Channel& );
 			~Channel( void ); // erase channel from all clients
 
 			string					name;
+			string					topic;
 			string					password;
 			size_t					userLimit;
 			set< const Client* >	users;

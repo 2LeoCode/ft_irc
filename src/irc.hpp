@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   irc.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/11 14:26:16 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/05/16 17:02:03 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/05/19 23:16:43 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <set>
 #include <list>
 #include <algorithm>
+#include <cstdarg>
 #include "data.hpp"
 
 // https://datatracker.ietf.org/doc/html/rfc1459#section-6
