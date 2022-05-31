@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 15:50:06 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 16:06:13 by martin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -917,7 +917,7 @@ namespace irc
 			vector<string> receivers = split(arg[1], ',');
 			for (iter it = receivers.begin(); it != receivers.end(); it++)
 			{
-				if ((*it)[0] == '#' || (*it)[0] == '&')
+				if (*it->data() == '#' || *it->data() == '&')
 				{
 					//push every client of channel to chanTargets
 					try
