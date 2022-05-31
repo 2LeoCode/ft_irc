@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/01 00:02:25 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/01 00:07:18 by martin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -944,6 +944,10 @@ namespace irc
 								if ((*cliIt)->sockfd != sender.sockfd)
 									chanTargets.push_back(make_pair(*cliIt, ptr->name));
 							}
+						}
+						else
+						{
+							response << m_prefix() << ERR_CANNOTSENDTOCHAN << ptr->name << " :Cannot send to channel" << m_endl();
 						}
 					}
 					catch (...)
