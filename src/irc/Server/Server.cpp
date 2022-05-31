@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 17:17:23 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 17:21:09 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -929,7 +929,7 @@ namespace irc
 					{
 						typedef set<const irc::Client*>::iterator cliIter;
 						Channel *ptr = &m_channels.at(*it);
-						if (sender.hasMode(UMODE_OPERATOR) || ptr->canSpeak(sender))
+						if (ptr->canSpeak(sender))
 						{
 							for (cliIter cliIt = ptr->users.begin(); cliIt != ptr->users.end(); cliIt++)
 							{
