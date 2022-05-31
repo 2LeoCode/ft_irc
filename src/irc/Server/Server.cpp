@@ -6,7 +6,7 @@
 /*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 22:36:37 by martin           ###   ########.fr       */
+/*   Updated: 2022/05/31 23:39:46 by martin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -316,15 +316,20 @@ namespace irc
 	// martin ajout
 	vector< string > Server::m_parseCommand(const string &rawCommand)
 	{
-		vector< string >	command;
-		string				delimiter = " ";
-		size_t				pos(0);
+		vector< string >            command;
+		string                delimiter = " \f\r\t\b\v";
+		size_t                pos(0);
+		bool                colon(0);
 
-		while (pos < rawCommand.length())
+		while (pos < rawCommand.length() && colon == 0)
 		{
+			size_t colonPos = rawCommand.find_first_not_of(delimiter);
+			if (colonPos == string::npos)
+				break;
+			if (rawCommand[colonPos] == ':')
+				colon = 1;
 			command.push_back(rawCommand.substr(pos, rawCommand.find(delimiter, pos) - pos));
-			pos = rawCommand.find(delimiter, pos);
-			pos += (pos != rawCommand.npos);
+			pos += command.back.size();
 		}
 		return command;
 	}
@@ -891,7 +896,7 @@ namespace irc
 	{
 		ostringstream response;
 		vector< const Client* > privTargets;
-		vector< pair < const Client*, const string > >chanTargets;
+		vector< pair < const Client*, const string > > chanTargets;
 		
 
 		if (!m_isLogged(sender))
@@ -920,7 +925,7 @@ namespace irc
 		else
 		{
 			typedef vector< string >::iterator iter;
-			vector< string >receivers = split(arg[1], ',');
+			vector< string > receivers = split(arg[1], ',');
 			for (iter it = receivers.begin(); it != receivers.end(); it++)
 			{
 				if (*it->data() == '#' || *it->data() == '&')
@@ -954,7 +959,6 @@ namespace irc
 			for (privIter privIt = privTargets.begin(); privIt != privTargets.end(); privIt++)
 			{
 				string request;
-				// :<sender_nickname>!~<username>@<hostname> PRIVMSG <channel_name> :<msg>
 				request += ":" + sender.nickname + "!~" + sender.username + sender.hostname + " " + arg[0] + " " + (*privIt)->nickname + " " + arg[2];
 				request += m_endl();
 				m_appendToSend((*privIt)->sockfd, request);
