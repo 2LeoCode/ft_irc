@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:49 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/20 00:20:13 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 15:26:23 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ namespace irc
 		return m_invites.find(&c) != m_invites.end();
 	}
 
-	bool	Client::channelCount( void ) const
+	size_t	Client::channelCount( void ) const
 	{
 		return m_curChans.size();
 	}

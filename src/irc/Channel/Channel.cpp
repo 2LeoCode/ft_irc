@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 01:01:01 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/19 18:37:29 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 15:22:52 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,11 +116,6 @@ namespace irc
 		}
 		catch (...)
 		{ }
-	}
-
-	void	Channel::unbanNickname( const string &nick )
-	{
-		m_bannedNicknames.erase(nick);
 	}
 
 	void	Channel::unbanHostname( const string &host )

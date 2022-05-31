@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 15:12:22 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 15:50:06 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,12 @@
 #define BUFFER_SIZE 2048
 
 #define MODE_APPLY( true_action, false_action ) \
-do\
-	if (add)\
-		true_action ;\
-	else\
-		false_action ;\
-while (0)
+	do\
+		if (add)\
+			true_action ;\
+		else\
+			false_action ;\
+	while (0)
 
 namespace irc
 {
@@ -109,8 +109,7 @@ namespace irc
 		if (setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &m_opt.reuseaddr, sizeof(int)))
 			throw runtime_error(string("setsockopt: ") + strerror(errno));
 
-		const int flags = fcntl(m_sockfd, F_GETFL);
-		if (fcntl(m_sockfd, F_SETFL, flags | O_NONBLOCK))
+		if (fcntl(m_sockfd, F_SETFL, O_NONBLOCK))
 			throw runtime_error(string("fcntl: ") + strerror(errno));
 
 		// Fill up the sockaddr struct for the server
@@ -631,7 +630,7 @@ namespace irc
 
 						if (strchr("olbvk", *it))
 						{
-							if (arg.size() <= nextArg)
+							if (arg.size() <= (size_t)nextArg)
 							{
 								response << m_prefix() << ERR_NEEDMOREPARAMS << " * MODE :Not enough parameters" << m_endl();
 								++it;
@@ -763,7 +762,7 @@ namespace irc
 	{
 		ostringstream response;
 
-		response << ':' << m_name << ' ';
+		(void)arg;
 		if (!m_isLogged(sender))
 			response << m_prefix() << ERR_NOTREGISTERED << " * DIE :You have not registeredr" << m_endl();
 		else if (!sender.hasMode(UMODE_OPERATOR))
@@ -801,9 +800,10 @@ namespace irc
 
 	void		Server::m_execJoin( Client &sender, const vector<string> &arg )
 	{
-		typedef typename vector<string>::const_iterator Iter;
+		typedef vector<string>::const_iterator Iter;
 		vector< string >					chanNames;
-		queue< string, vector< string > >	keys;
+		vector< string >					keys;
+		vector< string >::const_iterator	currentKey;
 		queue< Channel* >					chansToJoin;
 		ostringstream 						response;
 
@@ -815,7 +815,8 @@ namespace irc
 		{
 			chanNames = split(arg[1], ',');
 			if (arg.size() > 2)
-				keys = queue<string, vector<string>>(split(arg[2], ','));
+				keys = split(arg[2], ',');
+			currentKey = keys.begin();
 			for (Iter it = chanNames.begin(); it != chanNames.end(); ++it)
 			{
 				try
@@ -854,13 +855,9 @@ namespace irc
 					}
 					if (!cur->password.empty())
 					{
-						string	key;
-
-						if (keys.empty())
+						if (currentKey == keys.end())
 							goto BAD_KEY;
-						key = keys.front();
-						keys.pop();
-						if (key != cur->password)
+						if (*currentKey != cur->password)
 						{
 							BAD_KEY:
 							response << m_prefix() << ERR_BADCHANNELKEY << cur->name << " :Cannot join channel (+k)" << m_endl();
@@ -916,7 +913,7 @@ namespace irc
 		}
 		else
 		{
-			typedef typename vector<string>::iterator iter;
+			typedef vector<string>::iterator iter;
 			vector<string> receivers = split(arg[1], ',');
 			for (iter it = receivers.begin(); it != receivers.end(); it++)
 			{
@@ -925,7 +922,7 @@ namespace irc
 					//push every client of channel to chanTargets
 					try
 					{
-						typedef typename set<const irc::Client*>::iterator cliIter;
+						typedef set<const irc::Client*>::iterator cliIter;
 						Channel *ptr = &m_channels.at(*it);
 						for (cliIter cliIt = ptr->users.begin(); cliIt != ptr->users.end(); cliIt++)
 						{
@@ -946,12 +943,12 @@ namespace irc
 				}
 			}
 			//loop through target
-			typedef typename vector<const irc::Client*>::iterator privIter;
+			typedef vector<const irc::Client*>::iterator privIter;
 			for (privIter privIt = privTargets.begin(); privIt != privTargets.end(); privIt++)
 			{
 				// send message
 			}
-			typedef typename vector<const irc::Client*>::iterator chanIter;
+			typedef vector<const irc::Client*>::iterator chanIter;
 			for (chanIter chanIt = chanTargets.begin(); chanIt != chanTargets.end(); chanIt++)
 			{
 				// send message
@@ -962,9 +959,10 @@ namespace irc
 
 	void	Server::m_execNames( Client &sender, const vector< string > &arg )
 	{
-		typedef typename set< const Client* >::const_iterator	Iter;
+		typedef set< const Client* >::const_iterator	Iter;
 		ostringstream						response;
-		queue< string, vector< string > >	channels;
+		vector< string >					channels;
+		vector< string >::const_iterator	curChannel;
 
 		if (arg.size() < 2)
 			response << m_prefix() << ERR_NEEDMOREPARAMS << " * NAMES :Not enough parameters" << m_endl();
@@ -972,28 +970,29 @@ namespace irc
 			response << m_prefix() << ERR_NOTREGISTERED << " * NAMES :You have not registered" << m_endl();
 		else
 		{
-			channels = queue< string, vector< string > >(split(arg[1], ','));
-			while (!channels.empty())
+			channels = split(arg[1], ',');
+			curChannel = channels.begin();
+			while (curChannel != channels.end())
 			{
 				const Channel	*c;
-				string	cname = channels.front();
-				channels.pop();
 				try
 				{
-					c = &m_channels.at(cname);
+					c = &m_channels.at(*curChannel);
 				}
 				catch (...)
 				{ continue ; }
-				response << m_prefix() << RPL_NAMREPLY << sender.nickname << " = " << cname << " :";
+				response << m_prefix() << RPL_NAMREPLY << sender.nickname << " = " << *curChannel << " :";
 				for (Iter it = c->users.begin(); it != c->users.end() && response << ' '; ++it)
 				{
 					if (c->isOperator(**it))
 						response << '@';
 					response << (*it)->nickname;
 				}
-				response << m_endl() << m_prefix << RPL_ENDOFNAMES << cname << " :End of /NAMES list" << m_endl;
+				response << m_endl() << m_prefix() << RPL_ENDOFNAMES << *curChannel << " :End of /NAMES list" << m_endl();
+				++curChannel;
 			}
 		}
+		m_appendToSend(sender.sockfd, response.str());
 	}
 
 }

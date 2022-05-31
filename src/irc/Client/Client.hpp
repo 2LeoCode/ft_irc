@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:55 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/20 00:18:01 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 15:26:32 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ namespace irc
 			void				delMode( int );
 			bool				hasMode( int ) const;
 			bool				isInvited( const Channel& ) const;
-			bool				channelCount( void ) const;
+			size_t				channelCount( void ) const;
 			void				joinChannel( Channel& );
 			void				partChannel( Channel& );
 
