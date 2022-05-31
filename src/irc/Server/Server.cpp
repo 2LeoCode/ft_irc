@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 16:45:06 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 17:17:23 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -922,17 +922,20 @@ namespace irc
 			vector<string> receivers = split(arg[1], ',');
 			for (iter it = receivers.begin(); it != receivers.end(); it++)
 			{
-				if ((*it)[0] == '#' || (*it)[0] == '&')
+				if (*it->data() == '#' || *it->data() == '&')
 				{
 					//push every client of channel to chanTargets
 					try
 					{
 						typedef set<const irc::Client*>::iterator cliIter;
 						Channel *ptr = &m_channels.at(*it);
-						for (cliIter cliIt = ptr->users.begin(); cliIt != ptr->users.end(); cliIt++)
+						if (sender.hasMode(UMODE_OPERATOR) || ptr->canSpeak(sender))
 						{
-							// ===> /!\/!\ NEED TO ADD A CHECK BEFORE PUSHING /!\/!\ <===
-							chanTargets.push_back(*cliIt);
+							for (cliIter cliIt = ptr->users.begin(); cliIt != ptr->users.end(); cliIt++)
+							{
+								if ((*cliIt)->sockfd != sender.sockfd)
+									chanTargets.push_back(*cliIt);
+							}
 						}
 					}
 					catch (...)
