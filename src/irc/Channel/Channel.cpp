@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 01:01:01 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 15:22:52 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 17:10:30 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,18 @@ namespace irc
 	bool	Channel::isOperator( const Client &c ) const
 	{
 		return m_operators.find(&c) != m_operators.end();
+	}
+
+	bool	Channel::hasClient( const Client &c ) const
+	{
+		return users.find(&c) != users.end();
+	}
+
+	bool	Channel::canSpeak( const Client &c ) const
+	{
+		return (c.hasMode(UMODE_OPERATOR)
+			|| ((!hasMode(CMODE_NOOUTSIDEMSG) || hasClient(c))
+			&& (!hasMode(CMODE_MODERATED) || isOperator(c) || isVoiced(c))));
 	}
 
 	void	Channel::addClient( const Client &c )

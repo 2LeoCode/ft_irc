@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 15:50:06 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 16:45:06 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,10 +62,15 @@ namespace irc
 			.insert("PASS", &Server::m_execPass)
 			.insert("NICK", &Server::m_execNick)
 			.insert("USER", &Server::m_execUser)
-			.insert("PING", &Server::m_execPing);
+			.insert("PING", &Server::m_execPing)
+			.insert("OPER", &Server::m_execOper)
+			.insert("KILL", &Server::m_execKill)
+			.insert("MODE", &Server::m_execMode)
+			.insert("JOIN", &Server::m_execJoin)
+			.insert("PRIVMSG", &Server::m_execPrivmsg)
+			.insert("DIE", &Server::m_execDie)
+			.insert("NAMES", &Server::m_execNames);
 			//.insert("PONG", &Server::m_execPong);
-			//.insert("OPER", &Server::m_execOper)
-			//.insert("DIE", &Server::m_execDie)
 			//.insert("GLOBOPS", &Server::m_execGlobops)
 			//.insert("HELP", &Server::m_execHelp)
 			//.insert("IMPORTMOTD", &Server::m_execImportmotd)
@@ -73,22 +78,17 @@ namespace irc
 			//.insert("INVITE", &Server::m_execInvite)
 			//.insert("ISBANNED", &Server::m_execIsbanned)
 			//.insert("ISON", &Server::m_execIson)
-			//.insert("KILL", &Server::m_execKill)
 			//.insert("KILLBAN", &Server::m_execKillban)
 			//.insert("UNBAN", &Server::m_execUnban)
 			//.insert("SHUN", &Server::m_execShun)
 			//.insert("LIST", &Server::m_execList)
-			//.insert("MODE", &Server::m_execMode)
-			//.insert("JOIN", &Server::m_execJoin)
 			//.insert("KICK", &Server::m_execKick)
 			//.insert("SETNAME", &Server::m_execSetname)
 			//.insert("PART", &Server::m_execPart)
-			//.insert("PRIVMSG", &Server::m_execPrivmsg)
 			//.insert("QUIT", &Server::m_execQuit)
 			//.insert("BYE", &Server::m_execQuit)
 			//.insert("ME", &Server::m_execMe)
 			//.insert("NOTICE", &Server::m_execNotice)
-			//.insert("NAMES", &Server::m_execNames)
 			//.insert("TIME", &Server::m_execTime)
 			//.insert("TOPIC", &Server::m_execTopic)
 			//.insert("USERHOST", &Server::m_execUserhost)
@@ -819,6 +819,11 @@ namespace irc
 			currentKey = keys.begin();
 			for (Iter it = chanNames.begin(); it != chanNames.end(); ++it)
 			{
+				if (*it->data() != '#' && *it->data() != '&')
+				{
+					response << m_prefix() << ERR_NOSUCHCHANNEL << ' ' << *it << " :No such channel" << m_endl();
+					continue ;
+				}
 				try
 				{
 					chansToJoin.push(&m_channels.at(*it));
@@ -833,49 +838,49 @@ namespace irc
 						chansToJoin.push(&m_channels.at(*it));
 					}
 				}
-				while (!chansToJoin.empty())
-				{
-					Channel				*cur = chansToJoin.front();
-					chansToJoin.pop();
+			}
+			while (!chansToJoin.empty())
+			{
+				Channel				*cur = chansToJoin.front();
+				chansToJoin.pop();
 
-					if (sender.channelCount() == MAX_CHANNELS)
-					{
-						response << ERR_TOOMANYCHANNELS << cur->name << " :You have joined to many channels" << m_endl();
-						continue ;
-					}
-					if (cur->hasMode(CMODE_INVITEONLY) && !sender.isInvited(*cur))
-					{
-						response << m_prefix() << ERR_INVITEONLYCHAN << cur->name << " :Cannot join channel (+i)" << m_endl();
-						continue ;
-					}
-					if (cur->isBanned(sender))
-					{
-						response << m_prefix() << ERR_BANNEDFROMCHAN << cur->name << " :Cannot join channel (+b)" << m_endl();
-						continue ;
-					}
-					if (!cur->password.empty())
-					{
-						if (currentKey == keys.end())
-							goto BAD_KEY;
-						if (*currentKey != cur->password)
-						{
-							BAD_KEY:
-							response << m_prefix() << ERR_BADCHANNELKEY << cur->name << " :Cannot join channel (+k)" << m_endl();
-							continue ;
-						}
-					}
-					if (cur->userLimit != 0 && cur->users.size() == cur->userLimit)
-					{
-						response << m_prefix() << ERR_CHANNELISFULL << cur->name << " :Cannot join channel (+l)" << m_endl();
-						continue ;
-					}
-					sender.joinChannel(*cur);
-					if (cur->users.size() == 1)
-						cur->op(sender);
-					response << m_prefix() << "JOIN :" << cur->name << m_endl();
-					response << m_prefix() << RPL_TOPIC << cur->name << " :" << cur->topic << m_endl();
-					m_execNames(sender, m_make_args(2, "NAMES", cur->name.data()));
+				if (sender.channelCount() == MAX_CHANNELS)
+				{
+					response << ERR_TOOMANYCHANNELS << cur->name << " :You have joined to many channels" << m_endl();
+					continue ;
 				}
+				if (cur->hasMode(CMODE_INVITEONLY) && !sender.isInvited(*cur))
+				{
+					response << m_prefix() << ERR_INVITEONLYCHAN << cur->name << " :Cannot join channel (+i)" << m_endl();
+					continue ;
+				}
+				if (cur->isBanned(sender))
+				{
+					response << m_prefix() << ERR_BANNEDFROMCHAN << cur->name << " :Cannot join channel (+b)" << m_endl();
+					continue ;
+				}
+				if (!cur->password.empty())
+				{
+					if (currentKey == keys.end())
+						goto BAD_KEY;
+					if (*currentKey != cur->password)
+					{
+						BAD_KEY:
+						response << m_prefix() << ERR_BADCHANNELKEY << cur->name << " :Cannot join channel (+k)" << m_endl();
+						continue ;
+					}
+				}
+				if (cur->userLimit != 0 && cur->users.size() == cur->userLimit)
+				{
+					response << m_prefix() << ERR_CHANNELISFULL << cur->name << " :Cannot join channel (+l)" << m_endl();
+					continue ;
+				}
+				sender.joinChannel(*cur);
+				if (cur->users.size() == 1)
+					cur->op(sender);
+				response << m_prefix() << "JOIN :" << cur->name << m_endl();
+				response << m_prefix() << RPL_TOPIC << ' ' << cur->name << " :" << cur->topic << m_endl();
+				m_execNames(sender, m_make_args(2, "NAMES", cur->name.data()));
 			}
 		}
 		m_appendToSend(sender.sockfd, response.str());
@@ -981,14 +986,14 @@ namespace irc
 				}
 				catch (...)
 				{ continue ; }
-				response << m_prefix() << RPL_NAMREPLY << sender.nickname << " = " << *curChannel << " :";
+				response << m_prefix() << RPL_NAMREPLY << ' ' << sender.nickname << " = " << *curChannel << " :";
 				for (Iter it = c->users.begin(); it != c->users.end() && response << ' '; ++it)
 				{
 					if (c->isOperator(**it))
 						response << '@';
 					response << (*it)->nickname;
 				}
-				response << m_endl() << m_prefix() << RPL_ENDOFNAMES << *curChannel << " :End of /NAMES list" << m_endl();
+				response << m_endl() << m_prefix() << RPL_ENDOFNAMES << ' ' << *curChannel << " :End of /NAMES list" << m_endl();
 				++curChannel;
 			}
 		}

@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:58:14 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/19 18:37:17 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 17:06:45 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,11 @@ namespace irc
 			void	delMode( int );
 			bool	hasMode( int ) const;
 
+			bool	hasClient( const Client& ) const;
 			bool	isBanned( const Client& ) const;
 			bool	isVoiced( const Client& ) const;
 			bool	isOperator( const Client& ) const;
+			bool	canSpeak( const Client& ) const;
 
 			void	addClient( const Client& );
 			void	delClient( const Client& );
