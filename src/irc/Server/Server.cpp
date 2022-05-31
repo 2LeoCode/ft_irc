@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/20 01:08:21 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 15:12:22 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,7 +268,7 @@ namespace irc
 
 	const string	Server::m_endl( void ) const
 	{
-		return m_endl();
+		return "\r\n";
 	}
 
 	void	Server::m_recv( int fd )
@@ -494,7 +494,7 @@ namespace irc
 			{
 				if (it->second.sockfd != sender.sockfd && it->second.nickname == arg[1])
 				{
-					response << m_prefix() << ERR_NICKNAMEINUSE << " * " << arg[1] << " :Nickname is already in use";
+					response << m_prefix() << ERR_NICKNAMEINUSE << " * " << arg[1] << " :Nickname is already in use" << m_endl();
 					break ;
 				}
 				++it;
@@ -893,26 +893,26 @@ namespace irc
 
 		if (!m_isLogged(sender))
 		{
-			response << " * PRIVMSG :You have not registered";
+			response << m_prefix() << " * PRIVMSG :You have not registered" << m_endl();
 		}
 		else if (arg.size() == 1)
 		{
-			response << ERR_NORECIPIENT << " * PRIVMSG :No recipient given (PRIVMSG)";
+			response << m_prefix() << ERR_NORECIPIENT << " * PRIVMSG :No recipient given (PRIVMSG)" << m_endl();
 		}
 		else if (arg.size() == 2)
 		{
 			if (arg[1][0] == ':')
 			{
-				response << ERR_NORECIPIENT << " * PRIVMSG :No recipient given (PRIVMSG)";
+				response << m_prefix() << ERR_NORECIPIENT << " * PRIVMSG :No recipient given (PRIVMSG)" << m_endl();
 			}
 			else
 			{
-				response << ERR_NOTEXTTOSEND << " * PRIVMSG :No text to send (PRIVMSG)";
+				response << m_prefix() << ERR_NOTEXTTOSEND << " * PRIVMSG :No text to send (PRIVMSG)" << m_endl();
 			}
 		}
 		else if (arg[2][0] != ':')
 		{
-			response << ERR_NOTEXTTOSEND << " * PRIVMSG :No text to send (PRIVMSG)";
+			response << m_prefix() << ERR_NOTEXTTOSEND << " * PRIVMSG :No text to send (PRIVMSG)" << m_endl();
 		}
 		else
 		{
@@ -935,7 +935,7 @@ namespace irc
 					}
 					catch (...)
 					{
-						response << ERR_NOSUCHNICK << *it << " :No such nick/channel";
+						response << m_prefix() << ERR_NOSUCHNICK << *it << " :No such nick/channel" << m_endl();
 					}
 				}
 				else
@@ -957,7 +957,6 @@ namespace irc
 				// send message
 			}
 		}
-		response << "\r\n";
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
