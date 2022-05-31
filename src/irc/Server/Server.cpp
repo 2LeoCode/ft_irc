@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 17:21:09 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/05/31 17:45:46 by martin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -945,20 +945,21 @@ namespace irc
 				}
 				else
 				{
-					// ===> /!\/!\ NEED TO ADD A CHECK BEFORE PUSHING /!\/!\ <===
 					privTargets.push_back(&m_findClient(*it));
-					//push client to privTargets
 				}
 			}
 			//loop through target
 			typedef vector<const irc::Client*>::iterator privIter;
 			for (privIter privIt = privTargets.begin(); privIt != privTargets.end(); privIt++)
 			{
-				// send message
+				string request;
+				request += ":" + sender.hostname + " " + arg[0] + " " + (*privIt)->nickname + " " + arg[2];
 			}
 			typedef vector<const irc::Client*>::iterator chanIter;
 			for (chanIter chanIt = chanTargets.begin(); chanIt != chanTargets.end(); chanIt++)
 			{
+				string request;
+				request += ":" + sender.hostname + " " + arg[0] + " " + (*chanIt)->nickname + " " + arg[2];
 				// send message
 			}
 		}
