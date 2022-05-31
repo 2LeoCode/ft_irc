@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 23:48:02 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/01 00:02:25 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -322,15 +322,15 @@ namespace irc
 
 		while (pos < rawCommand.length())
 		{
-			size_t colonPos = rawCommand.find_first_not_of(delimiter);
-			if (colonPos == string::npos)
+			pos = rawCommand.find_first_not_of(delimiter, pos);
+			if (pos == string::npos)
 				break;
-			if (rawCommand[colonPos] == ':')
+			if (rawCommand[pos] == ':')
 			{
 				command.push_back(rawCommand.substr(pos, rawCommand.length() - pos));
 				break;
 			}
-			command.push_back(rawCommand.substr(pos, rawCommand.find(delimiter, pos) - pos));
+			command.push_back(rawCommand.substr(pos, rawCommand.find_first_of(delimiter, pos) - pos));
 			pos += command.back().size();
 		}
 		return command;
