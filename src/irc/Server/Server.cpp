@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 23:45:11 by martin           ###   ########.fr       */
+/*   Updated: 2022/05/31 23:48:02 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -320,7 +320,7 @@ namespace irc
 		string                delimiter = " \f\r\t\b\v";
 		size_t                pos(0);
 
-		while (pos < rawCommand.length() && colon == 0)
+		while (pos < rawCommand.length())
 		{
 			size_t colonPos = rawCommand.find_first_not_of(delimiter);
 			if (colonPos == string::npos)
