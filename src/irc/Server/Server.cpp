@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/01 00:10:12 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/01 00:19:19 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -854,17 +854,17 @@ namespace irc
 
 				if (sender.channelCount() == MAX_CHANNELS)
 				{
-					response << ERR_TOOMANYCHANNELS << cur->name << " :You have joined to many channels" << m_endl();
+					response << ERR_TOOMANYCHANNELS << ' ' << cur->name << " :You have joined to many channels" << m_endl();
 					continue ;
 				}
 				if (cur->hasMode(CMODE_INVITEONLY) && !sender.isInvited(*cur))
 				{
-					response << m_prefix() << ERR_INVITEONLYCHAN << cur->name << " :Cannot join channel (+i)" << m_endl();
+					response << m_prefix() << ERR_INVITEONLYCHAN << ' ' << cur->name << " :Cannot join channel (+i)" << m_endl();
 					continue ;
 				}
 				if (cur->isBanned(sender))
 				{
-					response << m_prefix() << ERR_BANNEDFROMCHAN << cur->name << " :Cannot join channel (+b)" << m_endl();
+					response << m_prefix() << ERR_BANNEDFROMCHAN << ' ' << cur->name << " :Cannot join channel (+b)" << m_endl();
 					continue ;
 				}
 				if (!cur->password.empty())
@@ -874,13 +874,13 @@ namespace irc
 					if (*currentKey != cur->password)
 					{
 						BAD_KEY:
-						response << m_prefix() << ERR_BADCHANNELKEY << cur->name << " :Cannot join channel (+k)" << m_endl();
+						response << m_prefix() << ERR_BADCHANNELKEY << ' ' << cur->name << " :Cannot join channel (+k)" << m_endl();
 						continue ;
 					}
 				}
 				if (cur->userLimit != 0 && cur->users.size() == cur->userLimit)
 				{
-					response << m_prefix() << ERR_CHANNELISFULL << cur->name << " :Cannot join channel (+l)" << m_endl();
+					response << m_prefix() << ERR_CHANNELISFULL << ' ' << cur->name << " :Cannot join channel (+l)" << m_endl();
 					continue ;
 				}
 				sender.joinChannel(*cur);
