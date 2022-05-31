@@ -6,7 +6,7 @@
 /*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 17:45:46 by martin           ###   ########.fr       */
+/*   Updated: 2022/05/31 22:36:37 by martin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -890,7 +890,8 @@ namespace irc
 	void	Server::m_execPrivmsg(Client &sender, const vector<string> &arg)
 	{
 		ostringstream response;
-		vector< const Client* > privTargets, chanTargets;
+		vector< const Client* > privTargets;
+		vector< pair < const Client*, const string > >chanTargets;
 		
 
 		if (!m_isLogged(sender))
@@ -918,8 +919,8 @@ namespace irc
 		}
 		else
 		{
-			typedef vector<string>::iterator iter;
-			vector<string> receivers = split(arg[1], ',');
+			typedef vector< string >::iterator iter;
+			vector< string >receivers = split(arg[1], ',');
 			for (iter it = receivers.begin(); it != receivers.end(); it++)
 			{
 				if (*it->data() == '#' || *it->data() == '&')
@@ -927,14 +928,14 @@ namespace irc
 					//push every client of channel to chanTargets
 					try
 					{
-						typedef set<const irc::Client*>::iterator cliIter;
+						typedef set< const irc::Client* >::iterator cliIter;
 						Channel *ptr = &m_channels.at(*it);
 						if (ptr->canSpeak(sender))
 						{
 							for (cliIter cliIt = ptr->users.begin(); cliIt != ptr->users.end(); cliIt++)
 							{
 								if ((*cliIt)->sockfd != sender.sockfd)
-									chanTargets.push_back(*cliIt);
+									chanTargets.push_back(make_pair(*cliIt, ptr->name));
 							}
 						}
 					}
@@ -949,17 +950,22 @@ namespace irc
 				}
 			}
 			//loop through target
-			typedef vector<const irc::Client*>::iterator privIter;
+			typedef vector< const irc::Client* >::iterator privIter;
 			for (privIter privIt = privTargets.begin(); privIt != privTargets.end(); privIt++)
 			{
 				string request;
-				request += ":" + sender.hostname + " " + arg[0] + " " + (*privIt)->nickname + " " + arg[2];
+				// :<sender_nickname>!~<username>@<hostname> PRIVMSG <channel_name> :<msg>
+				request += ":" + sender.nickname + "!~" + sender.username + sender.hostname + " " + arg[0] + " " + (*privIt)->nickname + " " + arg[2];
+				request += m_endl();
+				m_appendToSend((*privIt)->sockfd, request);
 			}
-			typedef vector<const irc::Client*>::iterator chanIter;
+			typedef vector< pair < const irc::Client*, const string > >::iterator chanIter;
 			for (chanIter chanIt = chanTargets.begin(); chanIt != chanTargets.end(); chanIt++)
 			{
 				string request;
-				request += ":" + sender.hostname + " " + arg[0] + " " + (*chanIt)->nickname + " " + arg[2];
+				request += ":" + sender.nickname + "!~" + sender.username + sender.hostname + " " + arg[0] + " " + chanIt->second + " " + arg[2];
+				request += m_endl();
+				m_appendToSend(chanIt->first->sockfd, request);
 				// send message
 			}
 		}
