@@ -6,7 +6,7 @@
 /*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 16:06:13 by martin           ###   ########.fr       */
+/*   Updated: 2022/05/31 17:05:11 by martin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -924,10 +924,13 @@ namespace irc
 					{
 						typedef set<const irc::Client*>::iterator cliIter;
 						Channel *ptr = &m_channels.at(*it);
-						for (cliIter cliIt = ptr->users.begin(); cliIt != ptr->users.end(); cliIt++)
+						if (sender.hasMode(UMODE_OPERATOR) || ptr->canSpeak(sender))
 						{
-							// ===> /!\/!\ NEED TO ADD A CHECK BEFORE PUSHING /!\/!\ <===
-							chanTargets.push_back(*cliIt);
+							for (cliIter cliIt = ptr->users.begin(); cliIt != ptr->users.end(); cliIt++)
+							{
+								if ((*cliIt)->sockfd != sender.sockfd)
+									chanTargets.push_back(*cliIt);
+							}
 						}
 					}
 					catch (...)
