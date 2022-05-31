@@ -6,7 +6,7 @@
 /*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 23:39:46 by martin           ###   ########.fr       */
+/*   Updated: 2022/05/31 23:45:11 by martin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -319,7 +319,6 @@ namespace irc
 		vector< string >            command;
 		string                delimiter = " \f\r\t\b\v";
 		size_t                pos(0);
-		bool                colon(0);
 
 		while (pos < rawCommand.length() && colon == 0)
 		{
@@ -327,9 +326,12 @@ namespace irc
 			if (colonPos == string::npos)
 				break;
 			if (rawCommand[colonPos] == ':')
-				colon = 1;
+			{
+				command.push_back(rawCommand.substr(pos, rawCommand.length() - pos));
+				break;
+			}
 			command.push_back(rawCommand.substr(pos, rawCommand.find(delimiter, pos) - pos));
-			pos += command.back.size();
+			pos += command.back().size();
 		}
 		return command;
 	}
