@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: martin <martin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 22:36:37 by martin           ###   ########.fr       */
+/*   Updated: 2022/06/01 00:08:01 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -520,9 +520,10 @@ namespace irc
 				return ;
 			}
 		}
-		ostringstream	newHostName("@u");
-		newHostName << currentHostID++;
+		ostringstream	newHostName;
+		newHostName << "@u" << currentHostID++;
 		user.hostname = newHostName.str();
+		m_hostnames.insert(make_pair(user.hostname, user.addr().sin6_addr));
 	}
 
 	void	Server::m_execUser( Client &sender, const vector<string> &arg )
