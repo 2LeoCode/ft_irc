@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 09:09:43 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/08 14:36:41 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,8 +105,6 @@ namespace irc {
 													m_motd,
 													m_password;
 			vector< pollfd >						m_pollfd;
-			map< int, Client >						m_clients;
-			map< string, Channel >					m_channels;
 
 			list< pair< int, string > >				m_pings;
 
@@ -121,6 +119,8 @@ namespace irc {
 			typedef void	(Server::*ExecFun)( Client&, const vector<string>& );
 			Trie< ExecFun > 						m_execs;
 
+			map< string, Channel >					m_channels;
+			map< int, Client >						m_clients;
 			map< string, in6_addr >					m_hostnames;
 
 			struct {

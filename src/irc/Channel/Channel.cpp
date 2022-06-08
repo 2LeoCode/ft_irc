@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 01:01:01 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 09:53:03 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/08 14:34:11 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,7 @@ namespace irc
 	{ }
 
 	Channel::~Channel( void )
-	{
-	}
+	{ }
 
 	void	Channel::addMode( int mode )
 	{

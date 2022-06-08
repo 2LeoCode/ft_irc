@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 10:37:27 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/08 14:28:07 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -779,10 +779,8 @@ namespace irc
 			response << m_prefix() << ERR_NOTREGISTERED << " * DIE :You have not registered" << m_endl();
 		else if (!sender.hasMode(UMODE_OPERATOR))
 			response << m_prefix() << ERR_NOPRIVILEGES << " * :Permission Denied- You're not an IRC operator" << m_endl();
-		else {
-			write(1, "DEAD\n", 5);
+		else
 			throw (ShutdownEvent());
-		}
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
