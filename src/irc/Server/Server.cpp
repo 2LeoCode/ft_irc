@@ -1052,7 +1052,7 @@ namespace irc
 						response << m_endl() << m_prefix() << ERR_NOTONCHANNEL << "" << m_endl();
 					else
 					{
-						chan.users.erase(&sender);
+						sender.partChannel(chan);
 						// EXIT CHANNEL
 					}
 				}
@@ -1064,5 +1064,35 @@ namespace irc
 			}
 		}
 	}
+
+	void Server::m_execPong( Client &sender, const vector< string > &arg )
+	{
+		ostringstream		response;
+		typedef list< pair< int, pair< string, timespec > > >::iterator iter;  
+		//it->first -->fd
+		//it->second.first 
+		
+		if (arg.size() < 2)
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * NAMES :Not enough parameters" << m_endl();
+		for (iter it = m_pings.begin(); it != m_pings.end(); it++)
+		{
+			if (it->first == sender.sockfd)
+			{
+				if (it->second.first == arg[1])
+				{
+					// Stop timeout.
+				}
+				else
+				{
+					// wrong string.
+				}
+			}
+			else
+			{
+				// can't find client.
+			}
+		}
+	}
+
 
 }
