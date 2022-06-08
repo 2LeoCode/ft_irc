@@ -6,33 +6,52 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/22 23:58:32 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/13 13:14:50 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/08 15:50:00 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "data.hpp"
 #include "irc.hpp"
+#include <csignal>
 
 using irc::Server;
 using std::string;
+using std::strtol;
+using std::exception;
 using std::cout;
+using std::cerr;
 using std::endl;
+
+void INT_handler( int sig )
+{
+	(void)sig;
+	cout << "\r";
+	throw Server::ShutdownEvent();
+}
 
 int	main( int argc, char **argv )
 {
-	char	*endptr;
-	long	port;
-	string	password;
+	char				*endptr;
+	long				port;
+	string				password;
+	struct sigaction	act;
 
+	act.sa_handler = INT_handler;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = 0;
+	if (sigaction(SIGINT, &act, NULL))
+	{
+		cout << "Exception caught: " << strerror(errno) << endl;
+	}
 	if (argc < 3)
 	{
-		std::cerr << "usage: " << *argv << " <port> <password>" << std::endl;
+		cerr << "usage: " << *argv << " <port> <password>" << endl;
 		return 1;
 	}
-	port = std::strtol(argv[1], &endptr, 0);
+	port = strtol(argv[1], &endptr, 0);
 	if (port <= 0 || port > USHRT_MAX || *endptr)
 	{
-		std::cerr << "invalid port `" << argv[1] << '\'' << std::endl;
+		cerr << "invalid port `" << argv[1] << '\'' << endl;
 		return 1;
 	}
 	for (int i = 2; i < argc - 1; ++i)
@@ -43,7 +62,7 @@ int	main( int argc, char **argv )
 	{
 		Server("KEKserv", port, password).loop();
 	}
-	catch (const std::exception &e)
+	catch (const exception &e)
 	{
 		cout << "Exception caught: " << e.what() << endl;
 		return -1;

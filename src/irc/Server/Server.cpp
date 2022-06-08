@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 14:28:07 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/08 15:56:57 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,11 +142,15 @@ namespace irc
 
 		while (true) {
 			// Poll will block until any of the sockets is readable
-			ret = poll(m_pollfd.data(), m_pollfd.size(), -1);
+			ret = poll(m_pollfd.data(), m_pollfd.size(), 100);
 
 			if (ret < 0)
 				throw runtime_error(string("poll: ") + strerror(errno));
 
+			if (!ret) {
+				
+				continue ;
+			}
 			// Check which fd is rceadable by cheking pollfd::revents 
 			// (if revents == POLLIN the fd is readable)
 

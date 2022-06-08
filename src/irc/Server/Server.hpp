@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 14:36:41 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/08 15:58:31 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ namespace irc {
 													m_password;
 			vector< pollfd >						m_pollfd;
 
-			list< pair< int, string > >				m_pings;
+			list< pair< int, pair< string, timespec > > >	m_pings;
 
 			map< int, string >						m_pending;
 			map< int, string >						m_tosend;
