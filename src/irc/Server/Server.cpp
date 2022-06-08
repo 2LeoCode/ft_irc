@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 15:56:57 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/08 18:57:35 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <fcntl.h>
+#include <ctime>
 
 #define BUFFER_SIZE 2048
 
@@ -27,12 +28,16 @@
 			false_action ;\
 	while (0)
 
+static const timespec ping_timeout = { .tv_sec = PING_TIMEOUT, .tv_nsec = 0 };
+
 namespace irc
 {
 
 	Server::Server( void )
 	:	m_sockfd( -1 )
-	{ }
+	{
+		srandom(time(NULL));
+	}
 
 	Server::~Server( void )
 	{
@@ -136,21 +141,31 @@ namespace irc
 
 	void	Server::loop( void )
 	{
-		typedef vector< pollfd >::iterator	iter;
+		typedef vector< pollfd >::iterator								iter;
+		typedef list< pair< int, pair< string, timespec > > >::iterator	ping_iter;
 
 		int ret, client_fd;
+		timespec cur_time;
 
 		while (true) {
 			// Poll will block until any of the sockets is readable
-			ret = poll(m_pollfd.data(), m_pollfd.size(), 100);
+			ret = poll(m_pollfd.data(), m_pollfd.size(), 10);
 
 			if (ret < 0)
 				throw runtime_error(string("poll: ") + strerror(errno));
 
-			if (!ret) {
-				
-				continue ;
+			clock_gettime(CLOCK_MONOTONIC, &cur_time);
+
+			ping_iter it = m_pings.begin();
+			while (it != m_pings.end())
+			{
+				if (ping_timeout < cur_time - it->second.second)
+					m_kickClient(m_clients.at((it++)->first));
+				else
+					++it;
 			}
+			if (!ret)
+				continue ;
 			// Check which fd is rceadable by cheking pollfd::revents 
 			// (if revents == POLLIN the fd is readable)
 
@@ -399,7 +414,17 @@ namespace irc
 
 	void	Server::m_kickClient( Client &client )
 	{
-		typedef vector< pollfd >::iterator	iter;
+		typedef vector< pollfd >::iterator								iter;
+		typedef list< pair< int, pair< string, timespec > > >::iterator ping_iter;
+
+
+		{
+			ping_iter	it = m_pings.begin();
+			while (it != m_pings.end() && it->first != client.sockfd)
+				++it;
+			if (it != m_pings.end())
+				m_pings.erase(it);
+		}
 
 		iter	it = m_pollfd.begin();
 
@@ -471,7 +496,10 @@ namespace irc
 		else if (arg[1] == "LS")
 			response << m_prefix() << "CAP * LS :" << m_endl();
 		else if (arg[1] == "END")
+		{
+			m_pingClient(sender);
 			return ;
+		}
 		else
 			response << m_prefix() << ERR_INVALIDCAPCMD << " * " << arg[1] << " :Invalid CAP sub-command" << m_endl();
 		m_appendToSend(sender.sockfd, response.str());
@@ -561,6 +589,18 @@ namespace irc
 			return ;
 		}
 		m_appendToSend(sender.sockfd, response.str());
+	}
+
+	void	Server::m_pingClient( Client &c )
+	{
+		timespec		ts;
+		ostringstream	pingMsg;
+		string			randstr = randomString(10);
+
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		pingMsg << m_prefix() << " PING :" << randstr << endl;
+		m_pings.push_back(make_pair(c.sockfd, make_pair(randstr, ts)));
+		m_appendToSend(c.sockfd, pingMsg.str());
 	}
 
 	void	Server::m_execPing( Client &sender, const vector<string> &arg )

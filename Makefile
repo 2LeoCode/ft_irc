@@ -4,7 +4,7 @@ SHELL		=	zsh
 NAME		=	ft_irc
 
 CXX			=	clang++
-CXXFLAGS	=	-Wall -Werror -Wextra -MMD -std=c++98 -g#-g3 -fsanitize=address
+CXXFLAGS	=	-Wall -Werror -Wextra -MMD -std=c++98 #-g3 -fsanitize=address
 RM			=	rm -f
 
 SRC			=	src/irc/Channel/Channel.cpp\

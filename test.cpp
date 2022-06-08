@@ -4,25 +4,34 @@
 #include <iostream>
 #include <cerrno>
 #include <cstring>
+#include <cstdlib>
 
 using namespace std;
 
-int main(void) {
-	ifstream in("config/ops.list");
-	string line, name, pass;
+std::string randomString( size_t size )
+{
+	std::string ret;
+	size_t added;
+	long randNum;
+	char *ptr;
 
-	if (!in)
-			throw std::runtime_error(strerror(errno));
-	while (getline(in, line))
+	while (ret.size() < size)
 	{
-		size_t pos;
-    	while ((pos = line.find('\'')) != string::npos)
+		randNum = random();
+		ptr = reinterpret_cast< char* >(&randNum);
+		for (int i = 0; ret.size() < size && i < sizeof(long) / sizeof(char); ++i)
 		{
-    		line.replace(pos, 1, " ");
+			if (isgraph(*ptr))
+				ret += *ptr;
+			randNum <<= sizeof(char) * 8;
 		}
-		istringstream is(line);
-		is >> name >> pass;
-		cout << name << ',' << pass << endl;
 	}
+	return ret;
+}
+
+int main(void)
+{
+	srandom(time(NULL));
+	cout << randomString(10) << endl;
 	return 0;
 }

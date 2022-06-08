@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 15:58:31 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/08 18:36:29 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #include <netinet/in.h>
 
 #include "../../irc.hpp"
+
+#define PING_TIMEOUT 2
 
 namespace irc {
 
@@ -53,6 +55,7 @@ namespace irc {
 			int					m_execCommand( Client&, const vector< string >& ); // martin ajout
 
 			void		m_appendToSend( int, const string& );
+			void		m_pingClient( Client &c );
 
 			// added
 			void		m_execCap( Client&, const vector<string>& );
