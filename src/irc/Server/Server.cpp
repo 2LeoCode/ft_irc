@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/01 00:19:19 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/08 10:37:27 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -316,9 +316,10 @@ namespace irc
 	// martin ajout
 	vector< string > Server::m_parseCommand(const string &rawCommand)
 	{
-		vector< string >            command;
-		string                delimiter = " \f\r\t\b\v";
-		size_t                pos(0);
+		vector< string >		command;
+		string					delimiter = " \f\r\t\b\v";
+		size_t					pos(0);
+		size_t					next_space;
 
 		while (pos < rawCommand.length())
 		{
@@ -330,8 +331,11 @@ namespace irc
 				command.push_back(rawCommand.substr(pos, rawCommand.length() - pos));
 				break;
 			}
-			command.push_back(rawCommand.substr(pos, rawCommand.find_first_of(delimiter, pos) - pos));
-			pos += command.back().size();
+			next_space = rawCommand.find_first_of(delimiter, pos);
+			if (next_space == string::npos)
+				next_space = rawCommand.size();
+			command.push_back(rawCommand.substr(pos, next_space - pos));
+			pos = next_space;
 		}
 		return command;
 	}
@@ -394,7 +398,7 @@ namespace irc
 		typedef vector< pollfd >::iterator	iter;
 
 		iter	it = m_pollfd.begin();
-	
+
 		// Search for the client inside the pollfd array
 		while (it != m_pollfd.end() && it->fd != client.sockfd)
 			++it;
@@ -528,7 +532,7 @@ namespace irc
 			}
 		}
 		ostringstream	newHostName;
-		newHostName << "@u" << currentHostID++;
+		newHostName << "@user" << currentHostID++;
 		user.hostname = newHostName.str();
 		m_hostnames.insert(make_pair(user.hostname, user.addr().sin6_addr));
 	}
@@ -772,11 +776,13 @@ namespace irc
 
 		(void)arg;
 		if (!m_isLogged(sender))
-			response << m_prefix() << ERR_NOTREGISTERED << " * DIE :You have not registeredr" << m_endl();
+			response << m_prefix() << ERR_NOTREGISTERED << " * DIE :You have not registered" << m_endl();
 		else if (!sender.hasMode(UMODE_OPERATOR))
 			response << m_prefix() << ERR_NOPRIVILEGES << " * :Permission Denied- You're not an IRC operator" << m_endl();
-		else
+		else {
+			write(1, "DEAD\n", 5);
 			throw (ShutdownEvent());
+		}
 		m_appendToSend(sender.sockfd, response.str());
 	}
 

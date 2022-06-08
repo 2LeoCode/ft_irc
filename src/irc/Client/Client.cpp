@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:49 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 15:26:23 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/08 10:17:26 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <cerrno>
+#include <unistd.h>
 
 char	g_nickCharset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789-_[]{}\\`|";
 
@@ -27,7 +28,10 @@ namespace irc
 	{ }
 
 	Client::~Client( void )
-	{ }
+	{
+		for (set< Channel* >::iterator it = m_curChans.begin(); it != m_curChans.end(); ++it)
+			(*it)->kick(*this);
+	}
 
 	void	Client::addMode( int mode )
 	{

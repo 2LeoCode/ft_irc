@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:55 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/05/31 15:26:32 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/08 09:34:09 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,9 @@ namespace irc
 		private:
 			sockaddr_in6			m_addr;
 			unsigned				m_modes;
-			set< const Channel* >	m_curChans;
+			set< Channel* >			m_curChans;
 			set< const Channel* >	m_invites;
 	};
 
-	bool	operator <(const Client&, const Client&);
+	bool	operator <( const Client&, const Client& );
 }
