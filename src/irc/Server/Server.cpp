@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/09 16:20:07 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/09 21:09:27 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -333,13 +333,12 @@ namespace irc
 	}
 
 	// martin ajout
-	vector< string > Server::m_parseCommand(const string &rawCommand)
+	vector< string > Server::m_parseCommand( const string &rawCommand )
 	{
 		vector< string >		command;
 		string					delimiter = " \f\r\t\b\v";
 		size_t					pos(0);
 		size_t					next_space;
-
 		while (pos < rawCommand.length())
 		{
 			pos = rawCommand.find_first_not_of(delimiter, pos);
@@ -347,7 +346,7 @@ namespace irc
 				break;
 			if (rawCommand[pos] == ':')
 			{
-				command.push_back(rawCommand.substr(pos, rawCommand.length() - pos));
+				command.push_back(rawCommand.substr(pos + 1, rawCommand.length() - pos + 1));
 				break;
 			}
 			next_space = rawCommand.find_first_of(delimiter, pos);
@@ -356,6 +355,8 @@ namespace irc
 			command.push_back(rawCommand.substr(pos, next_space - pos));
 			pos = next_space;
 		}
+		if (command.back()[command.back().length() - 1] == '\r')
+			command.back().resize(command.back().length() - 1);
 		return command;
 	}
 
@@ -771,26 +772,43 @@ namespace irc
 						{
 							case 'o':
 								MODE_APPLY(chan->op(*user), chan->deop(*user));
+								response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << 'o';
 								break ;
 							case 'l':
 								MODE_APPLY(chan->userLimit = limit, chan->userLimit = 0);
+								response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << 'l';
+								if (add) response << ' ' << chan->userLimit;
+								response << m_endl();
 								break ;
 							case 'b':
+								response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << "b ";
 								if (banByHost)
+								{
 									MODE_APPLY(chan->banHostname(user->hostname), chan->unbanHostname(user->hostname));
+									response << user->hostname;
+								}
 								else
+								{
 									MODE_APPLY(chan->banNickname(user->nickname), chan->unbanNickname(user->nickname));
+									response << user->nickname;
+								}
+								response << m_endl();
 								break ;
 							case 'v':
 								MODE_APPLY(chan->voice(*user), chan->unvoice(*user));
+								response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << "v " << user->nickname << m_endl();
 								break ;
 							case 'k':
 								MODE_APPLY(chan->password = *key, chan->password.clear());
+								response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << 'k';
+								if (add) response << ' ' << *key;
+								response << m_endl();
 								break ;
 							default:
 								try
 								{
 									MODE_APPLY(chan->addMode(channelModes.at(*it)), chan->delMode(channelModes.at(*it)));
+									response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << *it << m_endl();
 								}
 								catch (...)
 								{
@@ -818,7 +836,7 @@ namespace irc
 				if (arg.size() == 2)
 				{
 					response << user->makePrefix() << RPL_UMODEIS << ' ' << arg[1] << " :" << user->getModes() << m_endl();
-					goto END;
+					goto END;	
 				}
 				while (it != arg[2].end())
 				{
@@ -834,6 +852,7 @@ namespace irc
 						try
 						{
 							MODE_APPLY(user->addMode(userModes.at(*it)), user->delMode(userModes.at(*it)));
+							response << user->makePrefix() << "MODE " << user->nickname << ' ' << (add ? '+' : '-') << *it << m_endl();
 						}
 						catch (...)
 						{
@@ -929,11 +948,11 @@ namespace irc
 						chansToJoin.push(&m_channels.at(*it));
 					}
 				}
+				response << sender.makePrefix() << "JOIN :" << *it << m_endl();
 			}
 			while (!chansToJoin.empty())
 			{
 				Channel	*cur = chansToJoin.front();
-				string userprefix;
 				chansToJoin.pop();
 
 				if (sender.channelCount() == MAX_CHANNELS)
@@ -970,9 +989,10 @@ namespace irc
 				sender.joinChannel(*cur);
 				if (cur->users.size() == 1)
 					cur->op(sender);
-				response << m_prefix() << "JOIN :" << cur->name << m_endl();
-				response << m_prefix() << RPL_TOPIC << ' ' << cur->name << " :" << cur->topic << m_endl();
+				m_appendToSend(sender.sockfd, response.str());
 				m_execNames(sender, m_make_args(2, "NAMES", cur->name.data()));
+				response << m_prefix() << RPL_TOPIC << ' ' << cur->name << " :" << cur->topic << m_endl();
+				return ;
 			}
 		}
 		m_appendToSend(sender.sockfd, response.str());
@@ -1119,10 +1139,11 @@ namespace irc
 				if (it == m_channels.end())
 					response << m_prefix() << ERR_NOSUCHCHANNEL << "" << m_endl();
 				else if (!it->second.hasClient(sender))
-					response << m_endl() << m_prefix() << ERR_NOTONCHANNEL << "" << m_endl();
+					response << m_prefix() << ERR_NOTONCHANNEL << "" << m_endl();
 				else
 				{
 					sender.partChannel(it->second);
+					response << sender.makePrefix() << "PART :" << it->second.name << m_endl();
 					// EXIT CHANNEL
 					if (it->second.empty())
 						m_channels.erase(it);
@@ -1145,9 +1166,11 @@ namespace irc
 			iter it = m_pings.begin();
 			while (it != m_pings.end() && it->first != sender.sockfd)
 				++it;
-			if (it != m_pings.end() && it->second.first == arg[1])
-				// Stop timeout.
-				m_pings.erase(it);
+			if (it != m_pings.end())
+			{
+				if (it->second.first == arg[1])
+					m_pings.erase(it);
+			}
 			return ;
 		}
 		m_appendToSend(sender.sockfd, response.str());

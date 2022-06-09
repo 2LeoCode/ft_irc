@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/09 13:10:38 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/09 20:54:12 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <sys/socket.h>
 #include <sys/poll.h>
 #include <netinet/in.h>
+#include <string>
 
 #include "../../irc.hpp"
 
