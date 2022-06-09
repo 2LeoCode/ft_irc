@@ -1069,4 +1069,70 @@ namespace irc
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
+	void Server::m_execPart( Client &sender, const vector< string > &arg )
+	{
+		ostringstream		response;
+		vector< string >	channels;
+
+		if (arg.size() < 2)
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * NAMES :Not enough parameters" << m_endl();
+		else if (!m_isLogged(sender))
+		{
+			response << m_prefix() << ERR_NOTREGISTERED << " * NAMES :You have not registered" << m_endl();
+		}
+		else
+		{
+			channels = split(arg[1], ',');
+			for (size_t i = 0; i < channels.size(); i++)
+			{
+				try
+				{
+					Channel &chan = m_channels.at(channels[i]);
+					if (!chan.hasClient(sender))
+						response << m_endl() << m_prefix() << ERR_NOTONCHANNEL << "" << m_endl();
+					else
+					{
+						sender.partChannel(chan);
+						// EXIT CHANNEL
+					}
+				}
+				catch(const std::exception& e)
+				{
+					response << m_prefix() << ERR_NOSUCHCHANNEL << "" << m_endl();
+				}
+				
+			}
+		}
+	}
+
+	void Server::m_execPong( Client &sender, const vector< string > &arg )
+	{
+		ostringstream		response;
+		typedef list< pair< int, pair< string, timespec > > >::iterator iter;  
+		//it->first -->fd
+		//it->second.first 
+		
+		if (arg.size() < 2)
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * NAMES :Not enough parameters" << m_endl();
+		for (iter it = m_pings.begin(); it != m_pings.end(); it++)
+		{
+			if (it->first == sender.sockfd)
+			{
+				if (it->second.first == arg[1])
+				{
+					// Stop timeout.
+				}
+				else
+				{
+					// wrong string.
+				}
+			}
+			else
+			{
+				// can't find client.
+			}
+		}
+	}
+
+
 }
