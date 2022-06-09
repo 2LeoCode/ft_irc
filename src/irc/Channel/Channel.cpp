@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 01:01:01 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 14:34:11 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/09 15:13:18 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,6 +153,32 @@ namespace irc
 		if (users.find(&c) == users.end())
 			throw ClientNotInChannel();
 		m_voiced.erase(&c);
+	}
+
+	bool	Channel::empty( void ) const
+	{
+		return !users.size();
+	}
+
+	string Channel::getModes( void ) const
+	{
+		string modes = "+";
+
+		if (hasMode(CMODE_PRIVATE))
+			modes += 'p';
+		if (hasMode(CMODE_SECRET))
+			modes += 's';
+		if (hasMode(CMODE_INVITEONLY))
+			modes += 'i';
+		if (hasMode(CMODE_TOPICPROTECT))
+			modes += 't';
+		if (hasMode(CMODE_NOOUTSIDEMSG))
+			modes += 'n';
+		if (hasMode(CMODE_MODERATED))
+			modes += 'm';
+		if (modes.length() == 1)
+			modes.clear();
+		return modes;
 	}
 
 }

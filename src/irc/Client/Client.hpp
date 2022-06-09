@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:55 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 09:34:09 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/09 15:31:42 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,9 @@ namespace irc
 			size_t				channelCount( void ) const;
 			void				joinChannel( Channel& );
 			void				partChannel( Channel& );
+			void				exitAllChans( map< string, Channel >& );
+			string				makePrefix( void ) const;
+			string				getModes( void ) const;
 
 		private:
 			sockaddr_in6			m_addr;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/22 23:58:32 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 15:50:00 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/09 13:10:22 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,14 @@ int	main( int argc, char **argv )
 	string				password;
 	struct sigaction	act;
 
+	srandom(time(NULL));
 	act.sa_handler = INT_handler;
 	sigemptyset(&act.sa_mask);
 	act.sa_flags = 0;
 	if (sigaction(SIGINT, &act, NULL))
 	{
 		cout << "Exception caught: " << strerror(errno) << endl;
+		return 1;
 	}
 	if (argc < 3)
 	{

@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 18:36:29 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/09 13:10:38 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 #include "../../irc.hpp"
 
-#define PING_TIMEOUT 2
+#define PING_TIMEOUT 20
 
 namespace irc {
 
@@ -99,6 +99,8 @@ namespace irc {
 			void		m_execHelp( Client&, const std::vector<string>& );
 			void		m_execInfo( Client&, const vector<string>& );
 
+			void		m_welcome( const Client& );
+
 			const string			m_prefix( void ) const;
 			const string			m_endl( void ) const;
 			const vector< string >	m_make_args( int, ... ) const;
@@ -126,6 +128,7 @@ namespace irc {
 			map< string, Channel >					m_channels;
 			map< int, Client >						m_clients;
 			map< string, in6_addr >					m_hostnames;
+			time_t									m_startTime;
 
 			struct {
 				int		reuseaddr;

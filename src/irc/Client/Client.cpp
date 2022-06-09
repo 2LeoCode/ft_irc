@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:49 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/08 10:17:26 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/09 15:34:46 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,7 @@ namespace irc
 	{ }
 
 	Client::~Client( void )
-	{
-		for (set< Channel* >::iterator it = m_curChans.begin(); it != m_curChans.end(); ++it)
-			(*it)->kick(*this);
-	}
+	{ }
 
 	void	Client::addMode( int mode )
 	{
@@ -72,12 +69,47 @@ namespace irc
 	void	Client::partChannel( Channel &c )
 	{
 		m_curChans.erase(&c);
-		c.delClient(*this);
+		c.kick(*this);
+	}
+
+	void	Client::exitAllChans( map< string, Channel >& globChans )
+	{
+		typedef set< Channel* >::iterator iter;
+	
+		for (iter it = m_curChans.begin(); it != m_curChans.end(); ++it)
+		{
+			(*it)->kick(*this);
+			if ((*it)->empty())
+				globChans.erase((*it)->name);
+		}
+		m_curChans.clear();
 	}
 
 	bool	operator <( const Client &lhs, const Client &rhs )
 	{
 		return lhs.sockfd < rhs.sockfd;
+	}
+
+	string Client::makePrefix( void ) const
+	{
+		return ":" + nickname + "!~" + username + hostname + " ";
+	}
+
+	string Client::getModes( void ) const
+	{
+		string ret = "+";
+
+		if (hasMode(UMODE_INVISIBLE))
+			ret += 'i';
+		if (hasMode(UMODE_GNOTICELOG))
+			ret += 's';
+		if (hasMode(UMODE_WALLOPSLOG))
+			ret += 'w';
+		if (hasMode(UMODE_OPERATOR))
+			ret += 'o';
+		if (ret.length() == 1)
+			ret.clear();
+		return ret;
 	}
 
 }
