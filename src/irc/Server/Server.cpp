@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
+/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 21:03:22 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/10 23:17:10 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -864,7 +864,12 @@ namespace irc
 							response << m_prefix() << ERR_NOPRIVILEGES << " * MODE :Permission Denied- You're not an IRC operator" << m_endl();
 						else if (arg[1] != sender.nickname)
 							response << m_prefix() << ERR_USERSDONTMATCH << " * MODE :Cant change mode for other users" << m_endl();
+						else
+							goto APPLY;
+						++it;
+						continue ;
 					}
+					APPLY:
 					try
 					{
 						MODE_APPLY(user->addMode(userModes.at(*it)), user->delMode(userModes.at(*it)));
