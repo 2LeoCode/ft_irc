@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/22 23:58:32 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/09 13:10:22 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/10 16:28:03 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ int	main( int argc, char **argv )
 	}
 	catch (const exception &e)
 	{
+		endwin();
 		cout << "Exception caught: " << e.what() << endl;
 		return -1;
 	}
