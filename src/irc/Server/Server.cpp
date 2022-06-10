@@ -54,6 +54,15 @@ namespace irc
 
 	// ---- \/ DEBUG \/ ----
 
+	void	adjustXY(int *x, int *y, WINDOW *win)
+	{
+		if (*y > getmaxy(win) - 4)
+		{
+			*y = 1;
+			*x += 30;
+		}
+	}
+
 	void	Server::display_info(WINDOW *win)
 	{
 		int x = 1;
@@ -66,15 +75,19 @@ namespace irc
 			mvwprintw(win, y, x, (*chanIt).first.c_str()); chanX += (*chanIt).first.length();
 			mvwprintw(win, y, x, (*chanIt).second.getModes().c_str()); chanX += (*chanIt).second.getModes().length();
 			x += 4; y++;
+			adjustXY(&x, &y, win);
 			typedef set< const irc::Client* >::const_iterator cliIter;
 			for (cliIter cliIt = (*chanIt).second.users.begin();  cliIt != (*chanIt).second.users.end(); cliIt++)
 			{
+				adjustXY(&x, &y, win);
 				int cliX = x;
 				mvwprintw(win, y, cliX, (*cliIt)->nickname.c_str()); cliX += (*cliIt)->nickname.length() + 1;
 				mvwprintw(win, y, cliX, (*cliIt)->hostname.c_str()); cliX += (*cliIt)->hostname.length() + 1;
 				mvwprintw(win, y, cliX, (*cliIt)->getModes().c_str()); cliX += (*cliIt)->getModes().length() + 1;
+				y++;
 			}
-			x -= 4; y += 2;
+			x -= 4; y++;
+			adjustXY(&x, &y, win);
 		}
 	}
 
@@ -91,6 +104,7 @@ namespace irc
 
 	void	Server::debug()
 	{
+		wclear(win);
 		box(win, 0, 0);
 		display_info(win);
 		wrefresh(win);
@@ -1073,15 +1087,30 @@ namespace irc
 
 		if (!m_isLogged(sender))
 		{
-			response << m_prefix() << " * PRIVMSG :You have not registered" << m_endl();
+			response << m_prefix() << " * " << arg[0] << " :You have not registered" << m_endl();
 		}
 		else if (arg.size() == 1)
 		{
-			response << m_prefix() << ERR_NORECIPIENT << " * PRIVMSG :No recipient given (PRIVMSG)" << m_endl();
+			response << m_prefix() << ERR_NORECIPIENT << " * " << arg[0] << " :No recipient given (" << arg[0] << ")" << m_endl();
 		}
 		else if (arg.size() == 2)
 		{
+<<<<<<< HEAD
 			response << m_prefix() << ERR_NOTEXTTOSEND << " * PRIVMSG :No text to send (PRIVMSG)" << m_endl();
+=======
+			if (arg[1][0] == ':')
+			{
+				response << m_prefix() << ERR_NORECIPIENT << " * " << arg[0] << " :No recipient given (" << arg[0] << ")" << m_endl();
+			}
+			else
+			{
+				response << m_prefix() << ERR_NOTEXTTOSEND << " * " << arg[0] << " :No text to send (" << arg[0] << ")" << m_endl();
+			}
+		}
+		else if (arg[2][0] != ':')
+		{
+			response << m_prefix() << ERR_NOTEXTTOSEND << " * " << arg[0] << " :No text to send (" << arg[0] << ")" << m_endl();
+>>>>>>> martinovich
 		}
 		else
 		{
@@ -1135,6 +1164,11 @@ namespace irc
 			}
 		}
 		m_appendToSend(sender.sockfd, response.str());
+	}
+
+	void	Server::m_execNotice(Client &sender, const vector<string> &arg)
+	{
+		m_execPrivmsg(sender, arg);
 	}
 
 	void	Server::m_execNames( Client &sender, const vector< string > &arg )
