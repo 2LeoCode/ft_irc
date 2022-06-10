@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 10:38:49 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/10 12:20:09 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -604,7 +604,6 @@ namespace irc
 			{
 				if (it->second.sockfd != sender.sockfd && it->second.nickname == arg[1])
 				{
-					cout << "~ " << it->second.nickname << " -- " << sender.nickname << endl;
 					response << m_prefix() << ERR_NICKNAMEINUSE << " * " << arg[1] << " :Nickname is already in use" << m_endl();
 					break ;
 				}
@@ -964,7 +963,6 @@ namespace irc
 
 	void		Server::m_execJoin( Client &sender, const vector<string> &arg )
 	{
-		typedef vector<string>::const_iterator Iter;
 		vector< string >					chanNames;
 		vector< string >					keys;
 		vector< string >::const_iterator	currentKey;
@@ -981,6 +979,7 @@ namespace irc
 			if (arg.size() > 2)
 				keys = split(arg[2], ',');
 			currentKey = keys.begin();
+			typedef vector<string>::const_iterator Iter;
 			for (Iter it = chanNames.begin(); it != chanNames.end(); ++it)
 			{
 				if (*it->data() != '#' && *it->data() != '&')
@@ -1002,7 +1001,6 @@ namespace irc
 						chansToJoin.push(&m_channels.at(*it));
 					}
 				}
-				response << sender.makePrefix() << "JOIN :" << *it << m_endl();
 			}
 			while (!chansToJoin.empty())
 			{
@@ -1043,9 +1041,15 @@ namespace irc
 				sender.joinChannel(*cur);
 				if (cur->users.size() == 1)
 					cur->op(sender);
+				response << m_prefix() << RPL_TOPIC << ' ' << cur->name << " :" << cur->topic << m_endl();
 				m_appendToSend(sender.sockfd, response.str());
+
+				ostringstream info;
+				info << sender.makePrefix() << "JOIN :" << cur->name << m_endl();
+				typedef set< const Client* >::const_iterator Iter2;
+				for (Iter2 it2 = cur->users.begin(); it2 != cur->users.end(); ++it2)
+					m_appendToSend((*it2)->sockfd, info.str());
 				m_execNames(sender, m_make_args(2, "NAMES", cur->name.data()));
-				//response << m_prefix() << RPL_TOPIC << ' ' << cur->name << " :" << cur->topic << m_endl();
 				return ;
 			}
 		}
@@ -1163,18 +1167,15 @@ namespace irc
 				{ continue ; }
 				response << m_prefix() << RPL_NAMREPLY << ' ' << sender.nickname << " = " << *curChannel << " :";
 				Iter it = c->users.begin();
-				while (it != c->users.rbegin().base())
-				{
-					
-					++it;
-				}
-				for (Iter it = c->users.begin(); it != c->users.end(); ++it)
+				while (it != c->users.end())
 				{
 					if (c->isOperator(**it))
 						response << '@';
 					response << (*it)->nickname;
+					if (++it != c->users.end())
+						response << ' ';
 				}
-				response << m_endl() << m_prefix() << RPL_ENDOFNAMES << ' ' << *curChannel << " :End of /NAMES list" << m_endl();
+				response << m_endl() << m_prefix() << RPL_ENDOFNAMES << ' ' << sender.nickname << ' ' << *curChannel << " :End of /NAMES list" << m_endl();
 				++curChannel;
 			}
 		}
@@ -1202,8 +1203,12 @@ namespace irc
 					response << m_prefix() << ERR_NOTONCHANNEL << "" << m_endl();
 				else
 				{
+					ostringstream info;
+					info << sender.makePrefix() << "PART :" << it->second.name << m_endl();
+					typedef set< const Client* >::iterator	Iter;
+					for (Iter it2 = it->second.users.begin(); it2 != it->second.users.end(); ++it2)
+						m_appendToSend((*it2)->sockfd, info.str());
 					sender.partChannel(it->second);
-					response << sender.makePrefix() << "PART :" << it->second.name << m_endl();
 					// EXIT CHANNEL
 					if (it->second.empty())
 						m_channels.erase(it);
