@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 19:16:04 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/10 19:42:03 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -989,8 +989,10 @@ namespace irc
 				if (!cur->password.empty())
 				{
 					if (currentKey == keys.end())
+					{
 						goto BAD_KEY;
-					if (*currentKey != cur->password)
+					}
+					if (*currentKey++ != cur->password)
 					{
 						BAD_KEY:
 						response << m_prefix() << ERR_BADCHANNELKEY << ' ' << cur->name << " :Cannot join channel (+k)" << m_endl();
@@ -1016,7 +1018,6 @@ namespace irc
 					m_appendToSend((*it2)->sockfd, info.str());
 				m_execNames(sender, m_make_args(2, "NAMES", cur->name.data()));
 			}
-			return ;
 		}
 		m_appendToSend(sender.sockfd, response.str());
 	}
@@ -1063,7 +1064,7 @@ namespace irc
 						}
 						else
 						{
-							response << m_prefix() << ERR_CANNOTSENDTOCHAN << ptr->name << " :Cannot send to channel" << m_endl();
+							response << m_prefix() << ERR_CANNOTSENDTOCHAN << ' ' << ptr->name << " :Cannot send to channel" << m_endl();
 						}
 					}
 					catch (...)
