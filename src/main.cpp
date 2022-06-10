@@ -71,6 +71,7 @@ int	main( int argc, char **argv )
 	}
 	catch (Server::ShutdownEvent &e)
 	{
+		endwin();
 		cout << "Server is shutting down..." << endl;
 	}
 	return 0;

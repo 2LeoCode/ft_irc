@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <ncurses.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
 #include <netinet/in.h>
@@ -25,6 +26,7 @@ namespace irc {
 
 	class Server {
 		public:
+			friend void	debug(Server &server);
 			Server( void );
 			Server( string, short, string, int = 0, int = 32 );
 			~Server();
@@ -35,6 +37,12 @@ namespace irc {
 
 			struct ShutdownEvent { }; // We throw this object to turn off the server
 			struct ClientDisconnectEvent { };
+
+			// DEBUG
+
+			void	debug(void);
+			void	init_debug(void);
+			void	display_info(WINDOW *window);
 
 		private:
 
@@ -134,6 +142,9 @@ namespace irc {
 			struct {
 				int		reuseaddr;
 			}										m_opt;
+
+			// DEBUG
+			WINDOW									*win;
 	};
 
 }
