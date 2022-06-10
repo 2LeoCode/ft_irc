@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 13:51:18 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/10 16:18:05 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,8 +90,6 @@ namespace irc
 			//.insert("LIST", &Server::m_execList)
 			//.insert("KICK", &Server::m_execKick)
 			//.insert("SETNAME", &Server::m_execSetname)
-			//.insert("QUIT", &Server::m_execQuit)
-			//.insert("BYE", &Server::m_execQuit)
 			//.insert("ME", &Server::m_execMe)
 			//.insert("NOTICE", &Server::m_execNotice)
 			//.insert("TIME", &Server::m_execTime)
@@ -640,7 +638,7 @@ namespace irc
 		else if (!m_isLogged(sender))
 			response << m_prefix() << ERR_NOTREGISTERED << " * PING :You have not registered" << m_endl();
 		else
-			response << m_prefix() << "PONG :" << arg[1] << m_endl();
+			response << "PONG :" << arg[1] << m_endl();
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
@@ -657,7 +655,7 @@ namespace irc
 		else
 		{
 			sender.addMode(UMODE_OPERATOR);
-			response << m_prefix() << RPL_YOUREOPER << " * OPER :You are now an IRC operator" << m_endl();
+			response << m_prefix() << RPL_YOUREOPER << " :You are now an IRC operator" << m_endl();
 		}
 		m_appendToSend(sender.sockfd, response.str());
 	}
@@ -771,53 +769,58 @@ namespace irc
 								}
 							}
 						}
+						ostringstream info;
 						switch (*it)
 						{
 							case 'o':
 								MODE_APPLY(chan->op(*user), chan->deop(*user));
-								response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << 'o';
+								info << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << 'o';
 								break ;
 							case 'l':
 								MODE_APPLY(chan->userLimit = limit, chan->userLimit = 0);
-								response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << 'l';
-								if (add) response << ' ' << chan->userLimit;
-								response << m_endl();
+								info << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << 'l';
+								if (add) info << ' ' << chan->userLimit;
+								info << m_endl();
 								break ;
 							case 'b':
-								response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << "b ";
+								info << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << "b ";
 								if (banByHost)
 								{
 									MODE_APPLY(chan->banHostname(user->hostname), chan->unbanHostname(user->hostname));
-									response << user->hostname;
+									info << user->hostname;
 								}
 								else
 								{
 									MODE_APPLY(chan->banNickname(user->nickname), chan->unbanNickname(user->nickname));
-									response << user->nickname;
+									info << user->nickname;
 								}
-								response << m_endl();
+								info << m_endl();
 								break ;
 							case 'v':
 								MODE_APPLY(chan->voice(*user), chan->unvoice(*user));
-								response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << "v " << user->nickname << m_endl();
+								info << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << "v " << user->nickname << m_endl();
 								break ;
 							case 'k':
 								MODE_APPLY(chan->password = *key, chan->password.clear());
-								response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << 'k';
-								if (add) response << ' ' << *key;
-								response << m_endl();
+								info << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << 'k';
+								if (add) info << ' ' << *key;
+								info << m_endl();
 								break ;
 							default:
 								try
 								{
 									MODE_APPLY(chan->addMode(channelModes.at(*it)), chan->delMode(channelModes.at(*it)));
-									response << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << *it << m_endl();
+									info << user->makePrefix() << "MODE " << chan->name << ' ' << (add ? '+' : '-') << *it << m_endl();
 								}
 								catch (...)
 								{
-									response << m_prefix() << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me" << m_endl();
+									info << m_prefix() << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me" << m_endl();
 								}
 						}
+						typedef set< const Client* >::const_iterator CliIter;
+						for (CliIter it2 = chan->users.begin(); it2 != chan->users.end(); ++it2)
+							m_appendToSend((*it2)->sockfd, info.str());
+						info.clear();
 						++it;
 					}
 				}
@@ -843,6 +846,7 @@ namespace irc
 				}
 				while (it != arg[2].end())
 				{
+					ostringstream info;
 					if (!sender.hasMode(UMODE_OPERATOR))
 					{
 						if (*it == 'o')
@@ -853,12 +857,16 @@ namespace irc
 					try
 					{
 						MODE_APPLY(user->addMode(userModes.at(*it)), user->delMode(userModes.at(*it)));
-						response << user->makePrefix() << "MODE " << user->nickname << ' ' << (add ? '+' : '-') << *it << m_endl();
+						info << user->makePrefix() << "MODE " << user->nickname << ' ' << (add ? '+' : '-') << *it << m_endl();
 					}
 					catch (...)
 					{
 						response << m_prefix() << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me" << m_endl();
 					}
+					if (sender.sockfd != user->sockfd)
+						m_appendToSend(user->sockfd, info.str());
+					response << info;
+					info.clear();
 					++it;
 				}
 			}
@@ -997,8 +1005,8 @@ namespace irc
 				for (Iter2 it2 = cur->users.begin(); it2 != cur->users.end(); ++it2)
 					m_appendToSend((*it2)->sockfd, info.str());
 				m_execNames(sender, m_make_args(2, "NAMES", cur->name.data()));
-				return ;
 			}
+			return ;
 		}
 		m_appendToSend(sender.sockfd, response.str());
 	}
@@ -1009,7 +1017,6 @@ namespace irc
 		ostringstream response;
 		vector< const Client* > privTargets;
 		vector< pair < const Client*, const string > > chanTargets;
-		
 
 		if (!m_isLogged(sender))
 		{
@@ -1020,17 +1027,6 @@ namespace irc
 			response << m_prefix() << ERR_NORECIPIENT << " * PRIVMSG :No recipient given (PRIVMSG)" << m_endl();
 		}
 		else if (arg.size() == 2)
-		{
-			if (arg[1][0] == ':')
-			{
-				response << m_prefix() << ERR_NORECIPIENT << " * PRIVMSG :No recipient given (PRIVMSG)" << m_endl();
-			}
-			else
-			{
-				response << m_prefix() << ERR_NOTEXTTOSEND << " * PRIVMSG :No text to send (PRIVMSG)" << m_endl();
-			}
-		}
-		else if (arg[2][0] != ':')
 		{
 			response << m_prefix() << ERR_NOTEXTTOSEND << " * PRIVMSG :No text to send (PRIVMSG)" << m_endl();
 		}
@@ -1074,13 +1070,13 @@ namespace irc
 			typedef vector< const irc::Client* >::iterator privIter;
 			for (privIter privIt = privTargets.begin(); privIt != privTargets.end(); privIt++)
 			{
-				string request = sender.makePrefix() + arg[0] + " " + (*privIt)->nickname + " " + arg[2] + m_endl();
+				string request = sender.makePrefix() + arg[0] + " " + (*privIt)->nickname + " :" + arg[2] + m_endl();
 				m_appendToSend((*privIt)->sockfd, request);
 			}
 			typedef vector< pair < const irc::Client*, const string > >::iterator chanIter;
 			for (chanIter chanIt = chanTargets.begin(); chanIt != chanTargets.end(); chanIt++)
 			{
-				string request = sender.makePrefix() + arg[0] + " " + chanIt->second + " " + arg[2] + m_endl();
+				string request = sender.makePrefix() + arg[0] + " " + chanIt->second + " :" + arg[2] + m_endl();
 				m_appendToSend(chanIt->first->sockfd, request);
 				// send message
 			}
@@ -1210,7 +1206,7 @@ namespace irc
 		msg << m_prefix() << "002 " << c.nickname << " :Your host is KEKserv" << m_endl();
 		msg << m_prefix() << "003 " << c.nickname << " :KEKserv version 1.0" << m_endl();
 		msg << m_prefix() << "004 " << c.nickname << " :The server was started on " << ctime(&m_startTime) << m_endl();
-		msg << m_prefix() << "005 " << c.nickname << " :CASEMAPPING=ascii CHANMODES=opsitnbv USERMODES=iwso :Are supported by this server" << m_endl();
+		msg << m_prefix() << "005 " << c.nickname << " :CASEMAPPING=ascii CHANMODES=opsitnbv USERMODES=iwso CHANLIMIT=20 :Are supported by this server" << m_endl();
 		m_appendToSend(c.sockfd, msg.str());
 	}
 
