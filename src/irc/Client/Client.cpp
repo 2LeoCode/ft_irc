@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/16 00:53:49 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 11:47:15 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/10 19:06:39 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include <cerrno>
 #include <unistd.h>
 
-char	g_nickCharset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_[]{}\\`|";
+char	g_nickCharset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789-_[]{}\\`|";
 
 namespace irc
 {
