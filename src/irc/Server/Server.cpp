@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/09 21:09:27 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/10 10:38:49 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -371,7 +371,10 @@ namespace irc
 		}
 		catch ( const exception &e )
 		{
-			cerr << e.what() << endl;
+			ostringstream errmsg;
+
+			errmsg << m_prefix() << ERR_UNKNOWNCOMMAND << ' ' << cmd_name << " :Unknown command" << m_endl();
+			m_appendToSend(sender.sockfd, errmsg.str());
 		}
 		return (-1);
 	}
@@ -551,6 +554,7 @@ namespace irc
 			{
 				if (it->second.sockfd != sender.sockfd && it->second.nickname == arg[1])
 				{
+					cout << "~ " << it->second.nickname << " -- " << sender.nickname << endl;
 					response << m_prefix() << ERR_NICKNAMEINUSE << " * " << arg[1] << " :Nickname is already in use" << m_endl();
 					break ;
 				}
@@ -991,7 +995,7 @@ namespace irc
 					cur->op(sender);
 				m_appendToSend(sender.sockfd, response.str());
 				m_execNames(sender, m_make_args(2, "NAMES", cur->name.data()));
-				response << m_prefix() << RPL_TOPIC << ' ' << cur->name << " :" << cur->topic << m_endl();
+				//response << m_prefix() << RPL_TOPIC << ' ' << cur->name << " :" << cur->topic << m_endl();
 				return ;
 			}
 		}
@@ -1108,7 +1112,13 @@ namespace irc
 				catch (...)
 				{ continue ; }
 				response << m_prefix() << RPL_NAMREPLY << ' ' << sender.nickname << " = " << *curChannel << " :";
-				for (Iter it = c->users.begin(); it != c->users.end() && response << ' '; ++it)
+				Iter it = c->users.begin();
+				while (it != c->users.rbegin().base())
+				{
+					
+					++it;
+				}
+				for (Iter it = c->users.begin(); it != c->users.end(); ++it)
 				{
 					if (c->isOperator(**it))
 						response << '@';
