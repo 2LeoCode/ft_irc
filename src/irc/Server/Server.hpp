@@ -3,16 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/09 20:54:12 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/10 17:04:52 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include <ncurses.h>
+#ifdef DEBUG
+# include <ncurses.h>
+#endif
+
 #include <sys/socket.h>
 #include <sys/poll.h>
 #include <netinet/in.h>
@@ -26,7 +29,16 @@ namespace irc {
 
 	class Server {
 		public:
-			friend void	debug(Server &server);
+
+#ifdef DEBUG
+			void	debug(void);
+			void	init_debug(void);
+			void	display_info(WINDOW *window);
+		private:
+			WINDOW									*win;
+		public:
+#endif
+
 			Server( void );
 			Server( string, short, string, int = 0, int = 32 );
 			~Server();
@@ -38,11 +50,6 @@ namespace irc {
 			struct ShutdownEvent { }; // We throw this object to turn off the server
 			struct ClientDisconnectEvent { };
 
-			// DEBUG
-
-			void	debug(void);
-			void	init_debug(void);
-			void	display_info(WINDOW *window);
 
 		private:
 
@@ -51,7 +58,6 @@ namespace irc {
 			void		m_getOps( void );
 			bool		m_isLogged( const Client& ) const;
 			void		m_send( int, const std::string& );
-			//int		send( const std::string&, const std::string& ); Implementer si besoin
 			void		m_recv( int );
 			void		m_parsePending( void );
 			void		m_execCommandQueues( void );
@@ -60,8 +66,8 @@ namespace irc {
 			Client		&m_findClientByHost( const string & );
 			void		m_attributeHost( Client& );
 
-			vector< string >	m_parseCommand( const string& ); // martin ajout
-			int					m_execCommand( Client&, const vector< string >& ); // martin ajout
+			vector< string >	m_parseCommand( const string& );
+			int					m_execCommand( Client&, const vector< string >& );
 
 			void		m_appendToSend( int, const string& );
 			void		m_pingClient( Client &c );
@@ -79,8 +85,9 @@ namespace irc {
 			void		m_execPrivmsg( Client&, const vector<string>& );
 			void		m_execNames( Client&, const vector<string>& );
 			void		m_execPart( Client&, const vector<string>& );
-			void 		m_execPong( Client &sender, const vector< string > &arg );
+			void 		m_execPong( Client&, const vector< string >& );
 			void		m_execNotice( Client&, const vector<string>& );
+			void		m_execMode( Client&, const vector<string>& );
 
 			// to be added
 			void		m_execList( Client&, const vector<string>& );
@@ -91,7 +98,6 @@ namespace irc {
 			void		m_execIson( Client&, const vector<string>& );
 			void		m_execKillban( Client&, const vector<string>& );
 			void		m_execUnban( Client&, const vector<string>& );
-			void		m_execMode( Client&, const vector<string>& );
 			void		m_execKick( Client&, const vector<string>& );
 			void		m_execSetname( Client&, const vector<string>& );
 			void		m_execQuit( Client&, const vector<string>& );
@@ -143,8 +149,6 @@ namespace irc {
 				int		reuseaddr;
 			}										m_opt;
 
-			// DEBUG
-			WINDOW									*win;
 	};
 
 }

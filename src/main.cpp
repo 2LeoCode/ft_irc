@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/22 23:58:32 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 16:28:03 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/10 17:41:39 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,12 @@ void INT_handler( int sig )
 	cout << "\r";
 	throw Server::ShutdownEvent();
 }
+
+#ifdef DEBUG
+# define _DEBUG 1
+#else
+# define _DEBUG 0
+#endif
 
 int	main( int argc, char **argv )
 {
@@ -66,13 +72,17 @@ int	main( int argc, char **argv )
 	}
 	catch (const exception &e)
 	{
+#ifdef DEBUG
 		endwin();
+#endif
 		cout << "Exception caught: " << e.what() << endl;
 		return -1;
 	}
 	catch (Server::ShutdownEvent &e)
 	{
+#ifdef DEBUG
 		endwin();
+#endif
 		cout << "Server is shutting down..." << endl;
 	}
 	return 0;

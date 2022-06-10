@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 16:34:37 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/10 17:10:48 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,71 +52,11 @@ namespace irc
 		open(name, port, pass, protocol, backlog);
 	}
 
-	// ---- \/ DEBUG \/ ----
-
-	void	adjustXY(int *x, int *y, WINDOW *win)
-	{
-		if (*y > getmaxy(win) - 4)
-		{
-			*y = 1;
-			*x += 30;
-		}
-	}
-
-	void	Server::display_info(WINDOW *win)
-	{
-		int x = 1;
-		int y = 1;
-
-		typedef map< string, Channel >::iterator chanIter;
-		for (chanIter chanIt = m_channels.begin(); chanIt != m_channels.end(); chanIt++)
-		{
-			int chanX = x;
-			mvwprintw(win, y, x, (*chanIt).first.c_str()); chanX += (*chanIt).first.length();
-			mvwprintw(win, y, x, (*chanIt).second.getModes().c_str()); chanX += (*chanIt).second.getModes().length();
-			x += 4; y++;
-			adjustXY(&x, &y, win);
-			typedef set< const irc::Client* >::const_iterator cliIter;
-			for (cliIter cliIt = (*chanIt).second.users.begin();  cliIt != (*chanIt).second.users.end(); cliIt++)
-			{
-				adjustXY(&x, &y, win);
-				int cliX = x;
-				mvwprintw(win, y, cliX, (*cliIt)->nickname.c_str()); cliX += (*cliIt)->nickname.length() + 1;
-				mvwprintw(win, y, cliX, (*cliIt)->hostname.c_str()); cliX += (*cliIt)->hostname.length() + 1;
-				mvwprintw(win, y, cliX, (*cliIt)->getModes().c_str()); cliX += (*cliIt)->getModes().length() + 1;
-				y++;
-			}
-			x -= 4; y++;
-			adjustXY(&x, &y, win);
-		}
-	}
-
-	void	Server::init_debug()
-	{
-		initscr();
-		noecho();
-		curs_set(0);
-		cbreak();
-		int yMax, xMax;
-		getmaxyx(stdscr, yMax, xMax);
-		win = newwin(yMax, xMax, 0, 0);
-	}
-
-	void	Server::debug()
-	{
-		wclear(win);
-		box(win, 0, 0);
-		display_info(win);
-		wrefresh(win);
-	}
-
-
-	// ---- /\ DEBUG /\ ----
-
 	Server	&Server::open( string name, short port, string pass, int protocol, int backlog )
 	{
-		// DEBUG
+#ifdef DEBUG
 		init_debug();
+#endif
 		if (m_sockfd > 0)
 			throw runtime_error("Server already opened");
 
@@ -288,8 +228,9 @@ namespace irc
 			m_parsePending();
 			m_execCommandQueues();
 
-			// DEBUG
+#ifdef DEBUG
 			debug();
+#endif
 		}
 	}
 
@@ -1063,7 +1004,8 @@ namespace irc
 				sender.joinChannel(*cur);
 				if (cur->users.size() == 1)
 					cur->op(sender);
-				response << m_prefix() << RPL_TOPIC << ' ' << cur->name << " :" << cur->topic << m_endl();
+				if (!cur->topic.empty())
+					response << m_prefix() << RPL_TOPIC << ' ' << cur->name << " :" << cur->topic << m_endl();
 				m_appendToSend(sender.sockfd, response.str());
 
 				ostringstream info;
@@ -1283,3 +1225,65 @@ namespace irc
 	}
 
 }
+
+#ifdef DEBUG
+namespace irc
+{
+
+	void	adjustXY(int *x, int *y, WINDOW *win)
+	{
+		if (*y > getmaxy(win) - 4)
+		{
+			*y = 1;
+			*x += 30;
+		}
+	}
+	
+	void	Server::display_info(WINDOW *win)
+	{
+		int x = 1;
+		int y = 1;
+	
+		typedef map< string, Channel >::iterator chanIter;
+		for (chanIter chanIt = m_channels.begin(); chanIt != m_channels.end(); chanIt++)
+		{
+			int chanX = x;
+			mvwprintw(win, y, x, (*chanIt).first.c_str()); chanX += (*chanIt).first.length();
+			mvwprintw(win, y, x, (*chanIt).second.getModes().c_str()); chanX += (*chanIt).second.getModes().length();
+			x += 4; y++;
+			adjustXY(&x, &y, win);
+			typedef set< const irc::Client* >::const_iterator cliIter;
+			for (cliIter cliIt = (*chanIt).second.users.begin();  cliIt != (*chanIt).second.users.end(); cliIt++)
+			{
+				adjustXY(&x, &y, win);
+				int cliX = x;
+				mvwprintw(win, y, cliX, (*cliIt)->nickname.c_str()); cliX += (*cliIt)->nickname.length() + 1;
+				mvwprintw(win, y, cliX, (*cliIt)->hostname.c_str()); cliX += (*cliIt)->hostname.length() + 1;
+				mvwprintw(win, y, cliX, (*cliIt)->getModes().c_str()); cliX += (*cliIt)->getModes().length() + 1;
+				y++;
+			}
+			x -= 4; y++;
+			adjustXY(&x, &y, win);
+		}
+	}
+	
+	void	Server::init_debug()
+	{
+		initscr();
+		noecho();
+		curs_set(0);
+		cbreak();
+		int yMax, xMax;
+		getmaxyx(stdscr, yMax, xMax);
+		win = newwin(yMax, xMax, 0, 0);
+	}
+	
+	void	Server::debug()
+	{
+		wclear(win);
+		box(win, 0, 0);
+		display_info(win);
+		wrefresh(win);
+	}
+}
+#endif
