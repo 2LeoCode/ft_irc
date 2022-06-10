@@ -6,7 +6,7 @@
 /*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 23:17:10 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/11 00:02:31 by Leo Suardi       ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,8 +108,6 @@ namespace irc
 		m_getMotd();
 		m_getHelpMsg();
 		m_getOps();
-
-		// Disable IPV6_V6ONLY flag to allow both IPv4 and IPv6
 
 		m_opt.reuseaddr = 1;
 
