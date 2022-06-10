@@ -80,6 +80,7 @@ namespace irc {
 			void		m_execNames( Client&, const vector<string>& );
 			void		m_execPart( Client&, const vector<string>& );
 			void 		m_execPong( Client &sender, const vector< string > &arg );
+			void		m_execNotice( Client&, const vector<string>& );
 
 			// to be added
 			void		m_execList( Client&, const vector<string>& );
@@ -95,7 +96,6 @@ namespace irc {
 			void		m_execSetname( Client&, const vector<string>& );
 			void		m_execQuit( Client&, const vector<string>& );
 			void		m_execMe( Client&, const vector<string>& );
-			void		m_execNotice( Client&, const vector<string>& );
 			void		m_execTime( Client&, const vector<string>& );
 			void		m_execTopic( Client&, const vector<string>& );
 			void		m_execUserhost( Client&, const vector<string>& );
