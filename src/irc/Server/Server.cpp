@@ -62,7 +62,9 @@ namespace irc
 		typedef map< string, Channel >::iterator chanIter;
 		for (chanIter chanIt = m_channels.begin(); chanIt != m_channels.end(); chanIt++)
 		{
-			mvwprintw(win, y, x, (*chanIt).first.c_str());
+			int chanX = x;
+			mvwprintw(win, y, x, (*chanIt).first.c_str()); chanX += (*chanIt).first.length();
+			mvwprintw(win, y, x, (*chanIt).second.getModes().c_str()); chanX += (*chanIt).second.getModes().length();
 			x += 4; y++;
 			typedef set< const irc::Client* >::const_iterator cliIter;
 			for (cliIter cliIt = (*chanIt).second.users.begin();  cliIt != (*chanIt).second.users.end(); cliIt++)
@@ -70,6 +72,7 @@ namespace irc
 				int cliX = x;
 				mvwprintw(win, y, cliX, (*cliIt)->nickname.c_str()); cliX += (*cliIt)->nickname.length() + 1;
 				mvwprintw(win, y, cliX, (*cliIt)->hostname.c_str()); cliX += (*cliIt)->hostname.length() + 1;
+				mvwprintw(win, y, cliX, (*cliIt)->getModes().c_str()); cliX += (*cliIt)->getModes().length() + 1;
 			}
 			x -= 4; y += 2;
 		}
