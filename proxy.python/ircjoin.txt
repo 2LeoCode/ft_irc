@@ -1,0 +1,9 @@
+:lsuardi!~lsuardi@freenode-406.tkf.6vib9m.IP JOIN :#chan
+:*.freenode.net 353 nickname = #myfckchan :@nickname
+:*.freenode.net 366 nickname #myfckchan :End of /NAMES list.
+
+
+:nickname!~username@user0 JOIN :#chan
+:MyServer 353 nickname = #chan :@nickname
+:MyServer 366 #chan :End of /NAMES list
+
