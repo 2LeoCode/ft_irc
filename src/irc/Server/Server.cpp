@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 12:20:09 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/10 13:48:26 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -850,17 +850,14 @@ namespace irc
 						else if (arg[1] != sender.nickname)
 							response << m_prefix() << ERR_USERSDONTMATCH << " * MODE :Cant change mode for other users" << m_endl();
 					}
-					else
+					try
 					{
-						try
-						{
-							MODE_APPLY(user->addMode(userModes.at(*it)), user->delMode(userModes.at(*it)));
-							response << user->makePrefix() << "MODE " << user->nickname << ' ' << (add ? '+' : '-') << *it << m_endl();
-						}
-						catch (...)
-						{
-							response << m_prefix() << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me" << m_endl();
-						}
+						MODE_APPLY(user->addMode(userModes.at(*it)), user->delMode(userModes.at(*it)));
+						response << user->makePrefix() << "MODE " << user->nickname << ' ' << (add ? '+' : '-') << *it << m_endl();
+					}
+					catch (...)
+					{
+						response << m_prefix() << ERR_UNKNOWNMODE << ' ' << *it << " :is unknown mode char to me" << m_endl();
 					}
 					++it;
 				}
@@ -1148,9 +1145,9 @@ namespace irc
 			{
 				map< string, Channel >::iterator it = m_channels.find(channels[i]);
 				if (it == m_channels.end())
-					response << m_prefix() << ERR_NOSUCHCHANNEL << "" << m_endl();
+					response << m_prefix() << ERR_NOSUCHCHANNEL << ' ' << channels[i] " :No such channel" << m_endl();
 				else if (!it->second.hasClient(sender))
-					response << m_prefix() << ERR_NOTONCHANNEL << "" << m_endl();
+					response << m_prefix() << ERR_NOTONCHANNEL << ' ' << channels[i] << " :You're not on that channel" << m_endl();
 				else
 				{
 					ostringstream info;
