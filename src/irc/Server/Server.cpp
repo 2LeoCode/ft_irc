@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 16:18:05 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/10 16:34:37 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1095,22 +1095,7 @@ namespace irc
 		}
 		else if (arg.size() == 2)
 		{
-<<<<<<< HEAD
 			response << m_prefix() << ERR_NOTEXTTOSEND << " * PRIVMSG :No text to send (PRIVMSG)" << m_endl();
-=======
-			if (arg[1][0] == ':')
-			{
-				response << m_prefix() << ERR_NORECIPIENT << " * " << arg[0] << " :No recipient given (" << arg[0] << ")" << m_endl();
-			}
-			else
-			{
-				response << m_prefix() << ERR_NOTEXTTOSEND << " * " << arg[0] << " :No text to send (" << arg[0] << ")" << m_endl();
-			}
-		}
-		else if (arg[2][0] != ':')
-		{
-			response << m_prefix() << ERR_NOTEXTTOSEND << " * " << arg[0] << " :No text to send (" << arg[0] << ")" << m_endl();
->>>>>>> martinovich
 		}
 		else
 		{
