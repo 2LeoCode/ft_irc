@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include <ncurses.h>
 #include <sys/ioctl.h>
 #include <cerrno>
 #include <cstring>
@@ -51,8 +52,54 @@ namespace irc
 		open(name, port, pass, protocol, backlog);
 	}
 
+	// ---- \/ DEBUG \/ ----
+
+	void	Server::display_info(WINDOW *win)
+	{
+		int x = 1;
+		int y = 1;
+
+		typedef map< string, Channel >::iterator chanIter;
+		for (chanIter chanIt = m_channels.begin(); chanIt != m_channels.end(); chanIt++)
+		{
+			mvwprintw(win, y, x, (*chanIt).first.c_str());
+			x += 4; y++;
+			typedef set< const irc::Client* >::const_iterator cliIter;
+			for (cliIter cliIt = (*chanIt).second.users.begin();  cliIt != (*chanIt).second.users.end(); cliIt++)
+			{
+				int cliX = x;
+				mvwprintw(win, y, cliX, (*cliIt)->nickname.c_str()); cliX += (*cliIt)->nickname.length() + 1;
+				mvwprintw(win, y, cliX, (*cliIt)->hostname.c_str()); cliX += (*cliIt)->hostname.length() + 1;
+			}
+			x -= 4; y += 2;
+		}
+	}
+
+	void	Server::init_debug()
+	{
+		initscr();
+		noecho();
+		curs_set(0);
+		cbreak();
+		int yMax, xMax;
+		getmaxyx(stdscr, yMax, xMax);
+		win = newwin(yMax, xMax, 0, 0);
+	}
+
+	void	Server::debug()
+	{
+		box(win, 0, 0);
+		display_info(win);
+		wrefresh(win);
+	}
+
+
+	// ---- /\ DEBUG /\ ----
+
 	Server	&Server::open( string name, short port, string pass, int protocol, int backlog )
 	{
+		// DEBUG
+		init_debug();
 		if (m_sockfd > 0)
 			throw runtime_error("Server already opened");
 
@@ -225,6 +272,9 @@ namespace irc
 			// and if so, execute them
 			m_parsePending();
 			m_execCommandQueues();
+
+			// DEBUG
+			debug();
 		}
 	}
 

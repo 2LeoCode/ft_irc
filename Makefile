@@ -12,6 +12,7 @@ SRC			=	src/irc/Channel/Channel.cpp\
 				src/irc/Server/Server.cpp\
 				src/main.cpp\
 				src/utils.cpp
+
 OBJ			=	$(SRC:.cpp=.o)
 DEP			=	$(OBJ:.o=.d)
 
@@ -20,7 +21,7 @@ all: $(NAME)
 -include $(DEP)
 
 $(NAME): $(OBJ)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $^ -o $@ -lncurses
 
 clean:
 	$(RM) $(OBJ) $(DEP)
