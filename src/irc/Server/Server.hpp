@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 17:04:52 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/10 20:32:39 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ namespace irc {
 			void 		m_execPong( Client&, const vector< string >& );
 			void		m_execNotice( Client&, const vector<string>& );
 			void		m_execMode( Client&, const vector<string>& );
+			void		m_execKick( Client&, const vector<string>& );
 
 			// to be added
 			void		m_execList( Client&, const vector<string>& );
@@ -98,7 +99,6 @@ namespace irc {
 			void		m_execIson( Client&, const vector<string>& );
 			void		m_execKillban( Client&, const vector<string>& );
 			void		m_execUnban( Client&, const vector<string>& );
-			void		m_execKick( Client&, const vector<string>& );
 			void		m_execSetname( Client&, const vector<string>& );
 			void		m_execQuit( Client&, const vector<string>& );
 			void		m_execMe( Client&, const vector<string>& );

@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 19:42:03 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/10 21:03:22 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ namespace irc
 			.insert("PONG", &Server::m_execPong)
 			.insert("PART", &Server::m_execPart)
 			.insert("NOTICE", &Server::m_execNotice)
+			.insert("KICK", &Server::m_execKick)
 			.insert("QUIT", &Server::m_execQuit);
 			//.insert("GLOBOPS", &Server::m_execGlobops)
 			//.insert("HELP", &Server::m_execHelp)
@@ -93,7 +94,6 @@ namespace irc
 			//.insert("UNBAN", &Server::m_execUnban)
 			//.insert("SHUN", &Server::m_execShun)
 			//.insert("LIST", &Server::m_execList)
-			//.insert("KICK", &Server::m_execKick)
 			//.insert("SETNAME", &Server::m_execSetname)
 			//.insert("ME", &Server::m_execMe)
 			//.insert("TIME", &Server::m_execTime)
@@ -713,7 +713,9 @@ namespace irc
 					response << m_prefix() << RPL_CHANNELMODEIS << ' ' << sender.nickname << ' ' << arg[1] << " :" << chan->getModes() << m_endl();
 					goto END;
 				}
-				if (chan->isOperator(sender) || sender.hasMode(UMODE_OPERATOR))
+				if (!sender.hasMode(UMODE_OPERATOR) && !chan->isOperator(sender))
+					response << m_prefix() << ERR_CHANOPRIVSNEEDED << ' ' << chan->name << " :You're not channel operator" << m_endl();
+				else
 				{
 					int	nextArg = 3;
 
@@ -771,7 +773,7 @@ namespace irc
 								}
 								catch (...)
 								{
-									response << m_prefix() << ERR_NOSUCHNICK << arg[nextArg - 1] << " :No such nick" << m_endl();
+									response << m_prefix() << ERR_NOSUCHNICK << ' ' << arg[nextArg - 1] << " :No such nick" << m_endl();
 									++it;
 									continue ;
 								}
@@ -919,7 +921,7 @@ namespace irc
 			}
 			catch (...)
 			{
-				response << m_prefix() << ERR_NOSUCHNICK << " * KILL :" << arg[1] << "No such nick/channel" << m_endl();
+				response << m_prefix() << ERR_NOSUCHNICK << ' ' << arg[1] << "No such nick" << m_endl();
 			}
 		}
 		m_appendToSend(sender.sockfd, response.str());
@@ -1069,7 +1071,7 @@ namespace irc
 					}
 					catch (...)
 					{
-						response << m_prefix() << ERR_NOSUCHNICK << *it << " :No such nick/channel" << m_endl();
+						response << m_prefix() << ERR_NOSUCHNICK << ' ' << *it << " :No such nick/channel" << m_endl();
 					}
 				}
 				else
@@ -1211,6 +1213,81 @@ namespace irc
 		{
 			m_kickClient(sender);
 			return ;
+		}
+		m_appendToSend(sender.sockfd, response.str());
+	}
+
+	void Server::m_execKick( Client &sender, const vector< string > &arg )
+	{
+		ostringstream response;
+
+		if (arg.size() < 3)
+			response << m_prefix() << ERR_NEEDMOREPARAMS << " * KICK :Not enough parameters" << m_endl();
+		else if (!m_isLogged(sender))
+			response << m_prefix() << ERR_NOTREGISTERED << " * KICK :You have not registered" << m_endl();
+		else
+		{
+			vector< string >	chanNames, userNames;
+			vector< Channel* >	chans;
+
+			chanNames = split(arg[1], ','); userNames = split(arg[2], ',');
+			chans.reserve(chanNames.size());
+			for (size_t i = 0; i < chanNames.size(); ++i)
+			{
+				try
+				{
+					chans.push_back(&m_channels.at(chanNames[i]));
+				}
+				catch (...)
+				{
+					response << m_prefix() << ERR_NOSUCHCHANNEL << ' ' << chanNames[i] << " :No such channel" << m_endl();
+				}
+			}
+			for (size_t i = 0; i < userNames.size(); ++i)
+			{
+				Client	*user;
+
+				try
+				{
+					user = &m_findClient(userNames[i]);
+				}
+				catch (...)
+				{
+					response << m_prefix() << ERR_NOSUCHNICK << ' ' << userNames[i] << " :No such nick" << m_endl();
+					continue ;
+				}
+				size_t j = 0;
+				while (j < chans.size())
+				{
+					if (chans[j]->hasClient(*user))
+						break ;
+				}
+				if (j != chans.size())
+				{
+					if (!sender.hasMode(UMODE_OPERATOR))
+					{
+						if (!chans[j]->hasClient(sender))
+							response << m_prefix() << ERR_NOTONCHANNEL << ' ' << chans[j]->name << " :You're not on that channel" << m_endl();
+						else if (!chans[j]->isOperator(sender))
+							response << m_prefix() << ERR_CHANOPRIVSNEEDED << ' ' << chans[j]->name << " :You're not channel operator" << m_endl();
+						else
+							goto DO_KICK;
+						continue ;
+					}
+					DO_KICK:
+					ostringstream info;
+
+					info << sender.makePrefix() << "KICK " << chans[j]->name << ' ' << user->nickname << " :";
+					if (arg.size() > 3)
+						info << arg[3];
+					info << m_endl();
+
+					typedef set< const Client* >::const_iterator ChanIter;
+					for (ChanIter it = chans[j]->users.begin(); it != chans[j]->users.end(); ++it)
+						m_appendToSend((*it)->sockfd, info.str());
+					user->partChannel(*chans[j]);
+				}
+			}
 		}
 		m_appendToSend(sender.sockfd, response.str());
 	}
