@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 13:48:26 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/10 13:51:18 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1145,7 +1145,7 @@ namespace irc
 			{
 				map< string, Channel >::iterator it = m_channels.find(channels[i]);
 				if (it == m_channels.end())
-					response << m_prefix() << ERR_NOSUCHCHANNEL << ' ' << channels[i] " :No such channel" << m_endl();
+					response << m_prefix() << ERR_NOSUCHCHANNEL << ' ' << channels[i] << " :No such channel" << m_endl();
 				else if (!it->second.hasClient(sender))
 					response << m_prefix() << ERR_NOTONCHANNEL << ' ' << channels[i] << " :You're not on that channel" << m_endl();
 				else
