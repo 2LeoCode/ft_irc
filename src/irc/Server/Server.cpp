@@ -1330,8 +1330,8 @@ namespace irc
 		for (chanIter chanIt = m_channels.begin(); chanIt != m_channels.end(); chanIt++)
 		{
 			int chanX = x;
-			mvwprintw(win, y, x, (*chanIt).first.c_str()); chanX += (*chanIt).first.length();
-			mvwprintw(win, y, x, (*chanIt).second.getModes().c_str()); chanX += (*chanIt).second.getModes().length();
+			mvwprintw(win, y, chanX, (*chanIt).first.c_str()); chanX += (*chanIt).first.length() + 1;
+			mvwprintw(win, y, chanX, (*chanIt).second.getModes().c_str()); chanX += (*chanIt).second.getModes().length() + 1;
 			x += 4; y++;
 			adjustXY(&x, &y, win);
 			typedef set< const irc::Client* >::const_iterator cliIter;
