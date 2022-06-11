@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/29 15:38:31 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/11 00:02:31 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/11 12:01:51 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include <ncurses.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
@@ -82,6 +82,7 @@ namespace irc
 			.insert("PART", &Server::m_execPart)
 			.insert("NOTICE", &Server::m_execNotice)
 			.insert("KICK", &Server::m_execKick)
+			.insert("MOTD", &Server::m_execMotd)
 			.insert("QUIT", &Server::m_execQuit);
 			//.insert("GLOBOPS", &Server::m_execGlobops)
 			//.insert("HELP", &Server::m_execHelp)
@@ -105,7 +106,6 @@ namespace irc
 			//.insert("WHO", &Server::m_execWho)
 			//.insert("REHASH", &Server::m_execRehash);
 
-		m_getMotd();
 		m_getHelpMsg();
 		m_getOps();
 
@@ -232,15 +232,25 @@ namespace irc
 		}
 	}
 
-	void	Server::m_getMotd( void )
+	string	Server::m_getMotd( void )
 	{
+		struct stat		fst;
+		ostringstream	err;
+
+		if (stat("config/motd.txt", &fst) == -1)
+		{
+			if (errno == ENOENT)
+				throw MissingMotd();
+			throw runtime_error(string("m_getMotd: ") + strerror(errno));
+		}
+
 		ifstream		in("config/motd.txt");
 		ostringstream	s;
 
 		if (!in)
 			throw runtime_error(string("m_getMotd: ") + strerror(errno));
 		s << in.rdbuf();
-		m_motd = s.str();
+		return s.str();
 	}
 
 	void	Server::m_getHelpMsg( void )
@@ -1295,7 +1305,36 @@ namespace irc
 		m_appendToSend(sender.sockfd, response.str());
 	}
 
-	void Server::m_welcome( const Client &c )
+	void Server::m_execMotd( Client &sender, const vector<string> &arg )
+	{
+		vector<string>	motd_lines;
+		ostringstream	response;
+
+		static_cast<void>(arg);
+		if (!m_isLogged(sender))
+		{
+			response << m_prefix() << ERR_NOTREGISTERED << " * MOTD :You have not registered" << m_endl();
+		}
+		else
+		{
+			try
+			{
+				motd_lines = split(m_getMotd(), '\n');
+				response << RPL_MOTDSTART << " :- " << m_name << " Message of the day -" << m_endl();
+				for (size_t i = 0; i < motd_lines.size(); ++i)
+					response << RPL_MOTD << " :- " << motd_lines[i] << m_endl();
+				response << RPL_ENDOFMOTD << " :End of /MOTD command" << m_endl();
+			}
+			catch (const MissingMotd&)
+			{
+				response << m_prefix() << ERR_NOMOTD << " * MOTD :Motd file missing" << m_endl();
+			}
+		}
+
+		m_appendToSend(sender.sockfd, response.str());
+	}
+
+	void Server::m_welcome( Client &c )
 	{
 		ostringstream msg;
 		msg << m_prefix() << "001 " << c.nickname << " :Welcome to the Internet Relay Chat " << c.nickname << m_endl();
@@ -1303,6 +1342,7 @@ namespace irc
 		msg << m_prefix() << "003 " << c.nickname << " :KEKserv version 1.0" << m_endl();
 		msg << m_prefix() << "004 " << c.nickname << " :The server was started on " << ctime(&m_startTime) << m_endl();
 		msg << m_prefix() << "005 " << c.nickname << " :CASEMAPPING=ascii CHANMODES=opsitnbv USERMODES=iwso CHANLIMIT=" << MAX_CHANNELS << " :Are supported by this server" << m_endl();
+		m_execMotd(c, vector<string>(1, "MOTD"));
 		m_appendToSend(c.sockfd, msg.str());
 	}
 

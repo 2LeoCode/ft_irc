@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/10 20:32:39 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/11 11:35:16 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,12 @@ namespace irc {
 
 			struct ShutdownEvent { }; // We throw this object to turn off the server
 			struct ClientDisconnectEvent { };
+			EXCEPTION(MissingMotd, "Motd file missing");
 
 
 		private:
 
-			void		m_getMotd( void );
+			string		m_getMotd( void );
 			void		m_getHelpMsg( void );
 			void		m_getOps( void );
 			bool		m_isLogged( const Client& ) const;
@@ -89,6 +90,7 @@ namespace irc {
 			void		m_execNotice( Client&, const vector<string>& );
 			void		m_execMode( Client&, const vector<string>& );
 			void		m_execKick( Client&, const vector<string>& );
+			void		m_execMotd( Client&, const vector<string>& );
 
 			// to be added
 			void		m_execList( Client&, const vector<string>& );
@@ -114,7 +116,7 @@ namespace irc {
 			void		m_execHelp( Client&, const std::vector<string>& );
 			void		m_execInfo( Client&, const vector<string>& );
 
-			void		m_welcome( const Client& );
+			void		m_welcome( Client& );
 
 			const string			m_prefix( void ) const;
 			const string			m_endl( void ) const;
@@ -123,7 +125,6 @@ namespace irc {
 			sockaddr_in6							m_addr;
 			string									m_name,
 													m_helpmsg,
-													m_motd,
 													m_password;
 			vector< pollfd >						m_pollfd;
 

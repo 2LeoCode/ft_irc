@@ -1,1 +1,4 @@
 This is the default message of the day.
+With multiple
+lines
+To show that it works

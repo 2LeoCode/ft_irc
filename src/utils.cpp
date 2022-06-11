@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Leo Suardi <lsuardi@student.42.fr>         +#+  +:+       +#+        */
+/*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/13 11:28:37 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/06/08 18:13:55 by Leo Suardi       ###   ########.fr       */
+/*   Updated: 2022/06/11 11:45:33 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,12 @@ bool	operator <( const in6_addr &lhs, const in6_addr &rhs )
 std::vector< std::string >	split( std::string s, char c )
 {
 	std::vector< std::string >	splitted;
-	size_t	pos = 0;
-	size_t	lastArg = s.find(':');
+	size_t						pos = 0, lastPos = 0;
 
-	while ((pos = s.find(c, pos)) != std::string::npos && pos < lastArg)
-		s.replace(pos++, 1, " ");
-
-	std::istringstream	is(s);
-
-	while (!is.eof())
+	while ((pos = s.find(c, pos)) != std::string::npos)
 	{
-		std::string s;
-		is >> s;
-		splitted.push_back(s);
+		splitted.push_back(s.substr(lastPos, pos));
+		lastPos = pos;
 	}
 	return splitted;
 }
