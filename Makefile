@@ -1,6 +1,6 @@
 SHELL		=	zsh
 
-NAME		=	ft_irc
+NAME		=	ircserv
 DEBUG		=	false
 
 PORT		=	6667
