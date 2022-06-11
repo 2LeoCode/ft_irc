@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 16:24:24 by Leo Suardi        #+#    #+#             */
-/*   Updated: 2022/06/11 11:35:16 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/11 14:28:19 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,14 @@
 
 #include <sys/socket.h>
 #include <sys/poll.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <netinet/in.h>
-#include <string>
+#include <cerrno>
+#include <cstring>
+#include <unistd.h>
+#include <fcntl.h>
+#include <ctime>
 
 #include "../../irc.hpp"
 
@@ -91,30 +97,7 @@ namespace irc {
 			void		m_execMode( Client&, const vector<string>& );
 			void		m_execKick( Client&, const vector<string>& );
 			void		m_execMotd( Client&, const vector<string>& );
-
-			// to be added
-			void		m_execList( Client&, const vector<string>& );
-			void		m_execInvite( Client&, const vector<string>& );
-			void		m_execGlobops( Client&, const vector<string>& );
-			void		m_execImportmotd( Client&, const vector<string>& );
-			void		m_execIsbanned( Client&, const vector<string>& );
-			void		m_execIson( Client&, const vector<string>& );
-			void		m_execKillban( Client&, const vector<string>& );
-			void		m_execUnban( Client&, const vector<string>& );
-			void		m_execSetname( Client&, const vector<string>& );
 			void		m_execQuit( Client&, const vector<string>& );
-			void		m_execMe( Client&, const vector<string>& );
-			void		m_execTime( Client&, const vector<string>& );
-			void		m_execTopic( Client&, const vector<string>& );
-			void		m_execUserhost( Client&, const vector<string>& );
-			void		m_execVersion( Client&, const vector<string>& );
-			void		m_execWall( Client&, const vector<string>& );
-			void		m_execWallops( Client&, const vector<string>& );
-			void		m_execWho( Client&, const vector<string>& );
-			void		m_execRehash( Client&, const vector<string>& );
-			void		m_execShun( Client&, const vector<string>& );
-			void		m_execHelp( Client&, const std::vector<string>& );
-			void		m_execInfo( Client&, const vector<string>& );
 
 			void		m_welcome( Client& );
 

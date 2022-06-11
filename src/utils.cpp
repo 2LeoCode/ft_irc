@@ -6,7 +6,7 @@
 /*   By: lsuardi <lsuardi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/13 11:28:37 by lsuardi           #+#    #+#             */
-/*   Updated: 2022/06/11 12:23:21 by lsuardi          ###   ########.fr       */
+/*   Updated: 2022/06/11 14:01:04 by lsuardi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,14 @@ bool	operator <( const in6_addr &lhs, const in6_addr &rhs )
 std::vector< std::string >	split( std::string s, char c )
 {
 	std::vector< std::string >	splitted;
-	size_t						pos = 0, lastPos = 0;
+	size_t				pos = 0, lastPos = 0;
 
 	while ((pos = s.find(c, lastPos)) != std::string::npos)
 	{
-		splitted.push_back(s.substr(lastPos, pos));
+		splitted.push_back(s.substr(lastPos, pos - lastPos));
 		lastPos = pos + 1;
 	}
+	splitted.push_back(s.substr(lastPos, pos));
 	return splitted;
 }
 
